@@ -1,0 +1,488 @@
+[0;32mI (108) esp_image: segment 1: paddr=0001c3f0 vaddr=3fc929ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x9 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x42006658
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2810,len:0x178c
+load:0x403c8700,len:0x4
+load:0x403c8704,len:0xcb8
+load:0x403cb700,len:0x2db0
+entry 0x403c8914
+[0;32mI (26) boot: ESP-IDF v5.3-dirty 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time Nov  6 2025 16:16:01[0m
+[0;32mI (27) boot: Multicore bootloader[0m
+[0;32mI (30) boot: chip revision: v0.2[0m
+[0;32mI (34) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (39) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (43) boot.esp32s3: SPI Flash Size : 2MB[0m
+[0;32mI (48) boot: Enabling RNG early entropy source...[0m
+[0;32mI (54) boot: Partition Table:[0m
+[0;32mI (57) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (64) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (72) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (79) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (87) boot: End of partition table[0m
+[0;32mI (91) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=0c3c8h ( 50120) map[0m
+[0;32mI (108) esp_image: segment 1: paddr=0001c3f0 vaddr=3fc92900 size=02a44h ( 10820) load[0m
+[0;32mI (111) esp_image: segment 2: paddr=0001ee3c vaddr=40374000 size=011dch (  4572) load[0m
+[0;32mI (117) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=1d26ch (119404) map[0m
+[0;32mI (146) esp_image: segment 4: paddr=0003d294 vaddr=403751dc size=0d618h ( 54808) load[0m
+[0;32mI (164) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (165) boot: Disabling RNG early entropy source...[0m
+[0;32mI (176) cpu_start: Multicore app[0m
+[0;32mI (186) cpu_start: Pro cpu start user code[0m
+[0;32mI (186) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (186) app_init: Application information:[0m
+[0;32mI (189) app_init: Project name:     max_sensor[0m
+[0;32mI (194) app_init: App version:      5d517ef-dirty[0m
+[0;32mI (199) app_init: Compile time:     Nov  6 2025 16:15:55[0m
+[0;32mI (205) app_init: ELF file SHA256:  13fcf7bf9...[0m
+[0;32mI (210) app_init: ESP-IDF:          v5.3-dirty[0m
+[0;32mI (216) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (220) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (225) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (230) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (237) heap_init: At 3FC960E8 len 00053628 (333 KiB): RAM[0m
+[0;32mI (243) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (249) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (256) heap_init: At 600FE100 len 00001EE8 (7 KiB): RTCRAM[0m
+[0;32mI (263) spi_flash: detected chip: generic[0m
+[0;32mI (267) spi_flash: flash io: dio[0m
+[0;33mW (271) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (284) sleep: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (291) sleep: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (298) main_task: Started on CPU0[0m
+[0;32mI (308) main_task: Calling app_main()[0m
+[0;32mI (308) APP: 🚀 Starting MAX30102 with Optimized Settings[0m
+[0;32mI (308) APP: 🔧 Initializing I2C master...[0m
+[0;32mI (318) gpio: GPIO[8]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (328) gpio: GPIO[9]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 [0m
+[0;32mI (338) MAX30102: ✅ MAX30102 I2C device configured[0m
+[0;32mI (338) APP: ✅ I2C master and MAX30102 device initialized successfully[0m
+[0;32mI (348) MAX30102: 🔧 Initializing MAX30102 with new I2C driver...[0m
+[0;32mI (358) MAX30102: ✅ MAX30102 Part ID: 0x15[0m
+[0;32mI (468) MAX30102: ✅ MAX30102 initialized successfully[0m
+[0;32mI (468) APP: ✅ MAX30102 ready[0m
+[0;32mI (468) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (468) APP: 🔆 Initial LED current: 0x2F[0m
+[0;32mI (678) APP: 🔍 Calibrating ambient light...[0m
+[0;32mI (828) APP: 🌙 Ambient: IR=6019, RED=7121 | Threshold: 12038[0m
+[0;32mI (828) APP: 🧠 Initializing algorithms...[0m
+[0;32mI (828) APP: 👉 Ready! Place finger on sensor...[0m
+[0;32mI (918) APP: … waiting: IR=256/12038[0m
+[0;32mI (1008) APP: … waiting: IR=244/12038[0m
+[0;32mI (1098) APP: … waiting: IR=231/12038[0m
+[0;32mI (1198) APP: … waiting: IR=228/12038[0m
+[0;32mI (1288) APP: … waiting: IR=236/12038[0m
+[0;32mI (1378) APP: … waiting: IR=236/12038[0m
+[0;32mI (1468) APP: … waiting: IR=238/12038[0m
+[0;32mI (1558) APP: … waiting: IR=245/12038[0m
+[0;32mI (1648) APP: … waiting: IR=237/12038[0m
+[0;32mI (1738) APP: … waiting: IR=11353/12038[0m
+[0;32mI (1828) APP: … waiting: IR=8899/12038[0m
+[0;32mI (1928) APP: … waiting: IR=9998/12038[0m
+[0;32mI (1978) APP: 🔥 Fast warmup...[0m
+[0;32mI (2028) APP: ✅ FINGER DETECTED! Starting measurement...[0m
+[0;32mI (2038) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (2058) APP: DC=14948 AC=89.6(0.599%) ✅ LED=0x1F[0m
+[0;32mI (2088) APP: DC=16999 AC=491.3(2.890%) ✅ LED=0x1F[0m
+[0;32mI (2118) APP: DC=17491 AC=310.9(1.777%) ✅ LED=0x1F[0m
+[0;32mI (2128) APP: ⏱️  Uptime: 0.1s | Samples: 300 (277 valid, 92.3%)[0m
+[0;32mI (2128) APP: 📊 Events: Motion=0 | Quality=23 | HR=0 | SpO2=25[0m
+[0;32mI (2128) APP: 📈 AC/DC: Min=0.013% Avg=3.049% Max=33.763% Quality=100.0%[0m
+[0;32mI (2168) APP: DC=20289 AC=716.9(3.534%) ✅ LED=0x1F[0m
+[0;32mI (2208) APP: DC=23477 AC=833.9(3.552%) ✅ LED=0x1F[0m
+[0;33mW (2218) APP: 👉 Finger removed[0m
+[0;32mI (2218) APP: ⏱️  Uptime: 0.2s | Samples: 547 (510 valid, 93.2%)[0m
+[0;32mI (2218) APP: 📊 Events: Motion=0 | Quality=37 | HR=0 | SpO2=60[0m
+[0;32mI (2228) APP: 📈 AC/DC: Min=0.013% Avg=3.829% Max=33.763% Quality=100.0%[0m
+[0;32mI (2238) APP: 👉 Ready for next measurement...[0m
+[0;32mI (2258) APP: 🔥 Fast warmup...[0m
+[0;32mI (2308) APP: ✅ FINGER DETECTED! Starting measurement...[0m
+[0;32mI (2328) APP: DC=32787 AC=267.9(0.817%) ✅ LED=0x1F[0m
+[0;32mI (2328) APP: ⏱️  Uptime: 0.0s | Samples: 53 (51 valid, 96.2%)[0m
+[0;32mI (2328) APP: 📊 Events: Motion=0 | Quality=2 | HR=0 | SpO2=30[0m
+[0;32mI (2338) APP: 📈 AC/DC: Min=0.027% Avg=1.012% Max=2.402% Quality=81.7%[0m
+[0;32mI (2368) APP: DC=37966 AC=1215.9(3.203%) ✅ LED=0x1F[0m
+[0;32mI (2408) APP: DC=41688 AC=1001.2(2.402%) ✅ LED=0x1F[0m
+[0;32mI (2438) APP: DC=46256 AC=642.8(1.390%) ✅ LED=0x1F[0m
+[0;32mI (2438) APP: ⏱️  Uptime: 0.1s | Samples: 353 (351 valid, 99.4%)[0m
+[0;32mI (2438) APP: 📊 Events: Motion=0 | Quality=2 | HR=0 | SpO2=101[0m
+[0;32mI (2448) APP: 📈 AC/DC: Min=0.027% Avg=2.647% Max=12.529% Quality=100.0%[0m
+[0;32mI (2488) APP: DC=55649 AC=2008.6(3.609%) ✅ LED=0x1F[0m
+[0;32mI (2518) APP: DC=61450 AC=984.9(1.603%) ✅ LED=0x1F[0m
+[0;32mI (2548) APP: DC=67065 AC=576.5(0.860%) ✅ LED=0x1F[0m
+[0;32mI (2558) APP: ⏱️  Uptime: 0.2s | Samples: 653 (650 valid, 99.5%)[0m
+[0;32mI (2558) APP: 📊 Events: Motion=0 | Quality=3 | HR=0 | SpO2=137[0m
+[0;32mI (2558) APP: 📈 AC/DC: Min=0.015% Avg=2.999% Max=12.529% Quality=86.0%[0m
+[0;32mI (2598) APP: DC=74440 AC=1214.3(1.631%) ✅ LED=0x1F[0m
+[0;32mI (2638) APP: DC=77330 AC=209.8(0.271%) ✅ LED=0x1F[0m
+[0;32mI (2668) APP: DC=79304 AC=715.4(0.902%) ✅ LED=0x1F[0m
+[0;32mI (2668) APP: ⏱️  Uptime: 0.4s | Samples: 953 (946 valid, 99.3%)[0m
+[0;32mI (2678) APP: 📊 Events: Motion=0 | Quality=7 | HR=0 | SpO2=330[0m
+[0;32mI (2678) APP: 📈 AC/DC: Min=0.013% Avg=1.332% Max=12.529% Quality=90.2%[0m
+[0;32mI (2718) APP: DC=81719 AC=416.1(0.509%) ✅ LED=0x1F[0m
+[0;32mI (2758) APP: DC=81954 AC=319.4(0.390%) ✅ LED=0x1F[0m
+[0;32mI (2768) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (2768) APP: 💡 LED: 0x3F (AC=23.6, 0.029%)[0m
+[0;32mI (2788) APP: DC=82559 AC=13.3(0.016%) ❌ LED=0x3F[0m
+[0;32mI (2788) APP: ⏱️  Uptime: 0.5s | Samples: 1253 (1215 valid, 97.0%)[0m
+[0;32mI (2788) APP: 📊 Events: Motion=0 | Quality=38 | HR=0 | SpO2=461[0m
+[0;32mI (2798) APP: 📈 AC/DC: Min=0.010% Avg=0.240% Max=12.529% Quality=1.6%[0m
+[0;32mI (2818) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (2838) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (2838) APP: DC=83140 AC=249.6(0.300%) ✅ LED=0x1F[0m
+[0;32mI (2868) APP: DC=83088 AC=73.2(0.088%) ✅ LED=0x1F[0m
+[0;32mI (2888) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (2888) APP: 💡 LED: 0x3F (AC=31.2, 0.037%)[0m
+[0;32mI (2898) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (2898) APP: 💡 LED: 0x1F (AC=1210.9, 1.457%)[0m
+[0;32mI (2908) APP: DC=83111 AC=584.5(0.703%) ✅ LED=0x1F[0m
+[0;32mI (2908) APP: ⏱️  Uptime: 0.6s | Samples: 1553 (1485 valid, 95.6%)[0m
+[0;32mI (2918) APP: 📊 Events: Motion=0 | Quality=68 | HR=0 | SpO2=467[0m
+[0;32mI (2918) APP: 📈 AC/DC: Min=0.010% Avg=0.358% Max=12.529% Quality=70.3%[0m
+[0;32mI (2958) APP: DC=83256 AC=34.9(0.042%) ✅ LED=0x1F[0m
+[0;32mI (2998) APP: DC=83384 AC=365.4(0.438%) ✅ LED=0x1F[0m
+[0;32mI (3008) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (3028) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3028) APP: DC=83624 AC=269.9(0.323%) ✅ LED=0x1F[0m
+[0;32mI (3028) APP: ⏱️  Uptime: 0.7s | Samples: 1853 (1757 valid, 94.8%)[0m
+[0;32mI (3038) APP: 📊 Events: Motion=0 | Quality=96 | HR=0 | SpO2=547[0m
+[0;32mI (3038) APP: 📈 AC/DC: Min=0.010% Avg=0.512% Max=12.529% Quality=32.3%[0m
+[0;32mI (3078) APP: DC=83513 AC=99.8(0.120%) ✅ LED=0x1F[0m
+[0;32mI (3118) APP: DC=83543 AC=333.6(0.399%) ✅ LED=0x1F[0m
+[0;32mI (3138) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (3148) APP: DC=83656 AC=431.9(0.516%) ✅ LED=0x2F[0m
+[0;32mI (3148) APP: ⏱️  Uptime: 0.8s | Samples: 2153 (2054 valid, 95.4%)[0m
+[0;32mI (3148) APP: 📊 Events: Motion=0 | Quality=99 | HR=0 | SpO2=627[0m
+[0;32mI (3158) APP: 📈 AC/DC: Min=0.010% Avg=0.676% Max=12.529% Quality=51.6%[0m
+[0;32mI (3168) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3198) APP: DC=32016 AC=10611.4(33.144%) ❌ LED=0x1F[0m
+[0;32mI (3238) APP: DC=42205 AC=8192.9(19.412%) ❌ LED=0x1F[0m
+[0;32mI (3268) APP: DC=83606 AC=4713.5(5.638%) ✅ LED=0x1F[0m
+[0;32mI (3268) APP: ⏱️  Uptime: 1.0s | Samples: 2453 (2155 valid, 87.9%)[0m
+[0;32mI (3268) APP: 📊 Events: Motion=0 | Quality=298 | HR=0 | SpO2=654[0m
+[0;32mI (3278) APP: 📈 AC/DC: Min=0.010% Avg=27.822% Max=375.603% Quality=100.0%[0m
+[0;32mI (3318) APP: DC=76867 AC=1171.1(1.524%) ✅ LED=0x1F[0m
+[0;32mI (3348) APP: DC=65310 AC=6205.2(9.501%) ✅ LED=0x1F[0m
+[0;32mI (3378) APP: DC=53208 AC=2436.0(4.578%) ✅ LED=0x1F[0m
+[0;32mI (3378) APP: ⏱️  Uptime: 1.1s | Samples: 2753 (2450 valid, 89.0%)[0m
+[0;32mI (3378) APP: 📊 Events: Motion=0 | Quality=303 | HR=0 | SpO2=677[0m
+[0;32mI (3388) APP: 📈 AC/DC: Min=0.010% Avg=5.502% Max=375.603% Quality=100.0%[0m
+[0;32mI (3398) APP: 🚀 Performance: 2561.5 samples/sec[0m
+[0;32mI (3438) APP: DC=53204 AC=110.1(0.207%) ✅ LED=0x1F[0m
+[0;32mI (3458) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (3458) APP: 💡 LED: 0x3F (AC=15.8, 0.030%)[0m
+[0;32mI (3468) APP: DC=53246 AC=202.6(0.380%) ✅ LED=0x3F[0m
+[0;32mI (3478) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3478) APP: 💡 LED: 0x1F (AC=93.7, 0.176%)[0m
+[0;32mI (3498) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (3498) APP: 💡 LED: 0x3F (AC=14.2, 0.027%)[0m
+[0;32mI (3508) APP: DC=53047 AC=39.0(0.074%) ✅ LED=0x3F[0m
+[0;32mI (3508) APP: ⏱️  Uptime: 1.2s | Samples: 3053 (2720 valid, 89.1%)[0m
+[0;32mI (3508) APP: 📊 Events: Motion=0 | Quality=333 | HR=0 | SpO2=769[0m
+[0;32mI (3518) APP: 📈 AC/DC: Min=0.010% Avg=0.172% Max=375.603% Quality=7.4%[0m
+[0;32mI (3518) APP: 🚀 Performance: 2545.6 samples/sec[0m
+[0;32mI (3548) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3548) APP: 💡 LED: 0x1F (AC=1068.8, 1.999%)[0m
+[0;32mI (3558) APP: DC=53440 AC=422.9(0.791%) ✅ LED=0x1F[0m
+[0;32mI (3588) APP: DC=52916 AC=48.8(0.092%) ✅ LED=0x1F[0m
+[0;32mI (3598) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (3598) APP: 💡 LED: 0x3F (AC=17.4, 0.033%)[0m
+[0;32mI (3628) APP: DC=53192 AC=896.0(1.684%) ✅ LED=0x3F[0m
+[0;32mI (3628) APP: ⏱️  Uptime: 1.3s | Samples: 3353 (2946 valid, 87.9%)[0m
+[0;32mI (3628) APP: 📊 Events: Motion=0 | Quality=407 | HR=0 | SpO2=769[0m
+[0;32mI (3638) APP: 📈 AC/DC: Min=0.010% Avg=0.952% Max=375.603% Quality=100.0%[0m
+[0;32mI (3638) APP: 🚀 Performance: 2541.2 samples/sec[0m
+[0;32mI (3658) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3658) APP: 💡 LED: 0x1F (AC=395.0, 0.742%)[0m
+[0;32mI (3678) APP: DC=53469 AC=153.0(0.286%) ✅ LED=0x1F[0m
+[0;32mI (3718) APP: DC=53041 AC=90.8(0.171%) ✅ LED=0x1F[0m
+[0;32mI (3728) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (3728) APP: 💡 LED: 0x3F (AC=13.2, 0.025%)[0m
+[0;32mI (3748) APP: DC=53272 AC=364.1(0.683%) ✅ LED=0x3F[0m
+[0;32mI (3748) APP: ⏱️  Uptime: 1.4s | Samples: 3653 (3209 valid, 87.8%)[0m
+[0;32mI (3748) APP: 📊 Events: Motion=0 | Quality=444 | HR=0 | SpO2=771[0m
+[0;32mI (3758) APP: 📈 AC/DC: Min=0.010% Avg=0.551% Max=375.603% Quality=68.3%[0m
+[0;32mI (3768) APP: 🚀 Performance: 2534.9 samples/sec[0m
+[0;32mI (3778) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (3778) APP: 💡 LED: 0x1F (AC=149.3, 0.280%)[0m
+[0;32mI (3798) APP: DC=53721 AC=244.9(0.456%) ✅ LED=0x1F[0m
+[0;32mI (3838) APP: DC=59993 AC=3070.9(5.119%) ✅ LED=0x1F[0m
+[0;32mI (3868) APP: DC=69236 AC=15010.7(21.680%) ❌ LED=0x1F[0m
+[0;32mI (3868) APP: ⏱️  Uptime: 1.6s | Samples: 3953 (3484 valid, 88.1%)[0m
+[0;32mI (3868) APP: 📊 Events: Motion=0 | Quality=469 | HR=0 | SpO2=771[0m
+[0;32mI (3878) APP: 📈 AC/DC: Min=0.010% Avg=7.589% Max=375.603% Quality=100.0%[0m
+[0;32mI (3878) APP: 🚀 Performance: 2534.6 samples/sec[0m
+[0;32mI (3918) APP: DC=53227 AC=3667.5(6.890%) ✅ LED=0x1F[0m
+[0;32mI (3948) APP: DC=61341 AC=8608.2(14.033%) ✅ LED=0x1F[0m
+[0;32mI (3978) APP: DC=80344 AC=11193.1(13.931%) ✅ LED=0x1F[0m
+[0;32mI (3988) APP: ⏱️  Uptime: 1.7s | Samples: 4253 (3752 valid, 88.2%)[0m
+[0;32mI (3988) APP: 📊 Events: Motion=0 | Quality=501 | HR=0 | SpO2=771[0m
+[0;32mI (3988) APP: 📈 AC/DC: Min=0.010% Avg=7.464% Max=375.603% Quality=100.0%[0m
+[0;32mI (3998) APP: 🚀 Performance: 2536.0 samples/sec[0m
+[0;32mI (4038) APP: DC=63665 AC=7961.2(12.505%) ✅ LED=0x1F[0m
+[0;32mI (4068) APP: DC=82201 AC=14162.6(17.229%) ❌ LED=0x1F[0m
+[0;32mI (4098) APP: DC=106899 AC=5020.0(4.696%) ✅ LED=0x1F[0m
+[0;32mI (4098) APP: ⏱️  Uptime: 1.8s | Samples: 4553 (3975 valid, 87.3%)[0m
+[0;32mI (4098) APP: 📊 Events: Motion=0 | Quality=578 | HR=0 | SpO2=771[0m
+[0;32mI (4108) APP: 📈 AC/DC: Min=0.010% Avg=6.458% Max=375.603% Quality=100.0%[0m
+[0;32mI (4118) APP: 🚀 Performance: 2537.4 samples/sec[0m
+[0;32mI (4158) APP: DC=65111 AC=11355.9(17.441%) ❌ LED=0x1F[0m
+[0;32mI (4188) APP: DC=66194 AC=11439.0(17.281%) ❌ LED=0x1F[0m
+[0;32mI (4218) APP: DC=52703 AC=3226.5(6.122%) ✅ LED=0x1F[0m
+[0;32mI (4218) APP: ⏱️  Uptime: 1.9s | Samples: 4853 (4218 valid, 86.9%)[0m
+[0;32mI (4218) APP: 📊 Events: Motion=0 | Quality=635 | HR=0 | SpO2=771[0m
+[0;32mI (4228) APP: 📈 AC/DC: Min=0.010% Avg=5.571% Max=375.603% Quality=100.0%[0m
+[0;32mI (4238) APP: 🚀 Performance: 2538.7 samples/sec[0m
+[0;32mI (4268) APP: DC=57134 AC=5093.7(8.915%) ✅ LED=0x1F[0m
+[0;32mI (4298) APP: DC=67961 AC=4808.0(7.075%) ✅ LED=0x1F[0m
+[0;32mI (4338) APP: DC=52610 AC=3835.2(7.290%) ✅ LED=0x1F[0m
+[0;32mI (4338) APP: ⏱️  Uptime: 2.0s | Samples: 5153 (4492 valid, 87.2%)[0m
+[0;32mI (4338) APP: 📊 Events: Motion=0 | Quality=661 | HR=0 | SpO2=771[0m
+[0;32mI (4348) APP: 📈 AC/DC: Min=0.010% Avg=5.610% Max=375.603% Quality=100.0%[0m
+[0;32mI (4348) APP: 🚀 Performance: 2539.8 samples/sec[0m
+[0;32mI (4388) APP: DC=53970 AC=4435.8(8.219%) ✅ LED=0x1F[0m
+[0;32mI (4418) APP: DC=60258 AC=1300.1(2.158%) ✅ LED=0x1F[0m
+[0;32mI (4448) APP: DC=67335 AC=1830.2(2.718%) ✅ LED=0x1F[0m
+[0;32mI (4448) APP: ⏱️  Uptime: 2.1s | Samples: 5453 (4791 valid, 87.9%)[0m
+[0;32mI (4458) APP: 📊 Events: Motion=0 | Quality=662 | HR=0 | SpO2=771[0m
+[0;32mI (4458) APP: 📈 AC/DC: Min=0.010% Avg=2.301% Max=375.603% Quality=100.0%[0m
+[0;32mI (4468) APP: 🚀 Performance: 2540.8 samples/sec[0m
+[0;32mI (4508) APP: DC=52581 AC=3709.7(7.055%) ✅ LED=0x1F[0m
+[0;32mI (4538) APP: DC=52560 AC=206.7(0.393%) ✅ LED=0x1F[0m
+[0;32mI (4558) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (4558) APP: 💡 LED: 0x3F (AC=13.3, 0.025%)[0m
+[0;32mI (4568) APP: DC=52586 AC=2.1(0.004%) ❌ LED=0x3F[0m
+[0;32mI (4568) APP: ⏱️  Uptime: 2.3s | Samples: 5753 (5048 valid, 87.7%)[0m
+[0;32mI (4578) APP: 📊 Events: Motion=0 | Quality=705 | HR=0 | SpO2=771[0m
+[0;32mI (4578) APP: 📈 AC/DC: Min=0.010% Avg=0.403% Max=375.603% Quality=0.4%[0m
+[0;32mI (4588) APP: 🚀 Performance: 2540.1 samples/sec[0m
+[0;32mI (4598) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (4598) APP: 💡 LED: 0x1F (AC=648.1, 1.226%)[0m
+[0;32mI (4628) APP: DC=53108 AC=666.0(1.254%) ✅ LED=0x1F[0m
+[0;32mI (4658) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (4658) APP: DC=52583 AC=130.6(0.248%) ✅ LED=0x2F[0m
+[0;32mI (4668) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (4688) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (4688) APP: 💡 LED: 0x3F (AC=23.4, 0.044%)[0m
+[0;32mI (4698) APP: DC=52660 AC=11.0(0.021%) ❌ LED=0x3F[0m
+[0;32mI (4698) APP: ⏱️  Uptime: 2.4s | Samples: 6053 (5337 valid, 88.2%)[0m
+[0;32mI (4698) APP: 📊 Events: Motion=0 | Quality=716 | HR=0 | SpO2=771[0m
+[0;32mI (4708) APP: 📈 AC/DC: Min=0.010% Avg=0.163% Max=375.603% Quality=2.1%[0m
+[0;32mI (4718) APP: 🚀 Performance: 2532.8 samples/sec[0m
+[0;32mI (4728) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (4728) APP: 💡 LED: 0x1F (AC=2471.8, 4.448%)[0m
+[0;32mI (4758) APP: DC=67036 AC=327.6(0.489%) ✅ LED=0x1F[0m
+[0;32mI (4788) APP: DC=77584 AC=20357.5(26.239%) ❌ LED=0x1F[0m
+[0;32mI (4818) APP: DC=106497 AC=7332.1(6.885%) ✅ LED=0x1F[0m
+[0;32mI (4818) APP: ⏱️  Uptime: 2.5s | Samples: 6353 (5615 valid, 88.4%)[0m
+[0;32mI (4818) APP: 📊 Events: Motion=0 | Quality=738 | HR=0 | SpO2=771[0m
+[0;32mI (4828) APP: 📈 AC/DC: Min=0.010% Avg=6.605% Max=375.603% Quality=100.0%[0m
+[0;32mI (4838) APP: 🚀 Performance: 2529.3 samples/sec[0m
+[0;32mI (4868) APP: DC=62478 AC=21485.6(34.389%) ❌ LED=0x1F[0m
+[0;32mI (4898) APP: DC=81230 AC=2716.4(3.344%) ✅ LED=0x1F[0m
+[0;32mI (4938) APP: DC=101640 AC=5218.5(5.134%) ✅ LED=0x1F[0m
+[0;32mI (4938) APP: ⏱️  Uptime: 2.6s | Samples: 6653 (5835 valid, 87.7%)[0m
+[0;32mI (4938) APP: 📊 Events: Motion=0 | Quality=818 | HR=0 | SpO2=771[0m
+[0;32mI (4948) APP: 📈 AC/DC: Min=0.010% Avg=4.854% Max=375.603% Quality=100.0%[0m
+[0;32mI (4948) APP: 🚀 Performance: 2530.6 samples/sec[0m
+[0;32mI (4988) APP: DC=55274 AC=20600.2(37.269%) ❌ LED=0x1F[0m
+[0;32mI (5018) APP: DC=67635 AC=1975.0(2.920%) ✅ LED=0x1F[0m
+[0;32mI (5048) APP: DC=97728 AC=7615.7(7.793%) ✅ LED=0x1F[0m
+[0;32mI (5048) APP: ⏱️  Uptime: 2.7s | Samples: 6953 (6040 valid, 86.9%)[0m
+[0;32mI (5058) APP: 📊 Events: Motion=0 | Quality=913 | HR=0 | SpO2=771[0m
+[0;32mI (5058) APP: 📈 AC/DC: Min=0.010% Avg=7.441% Max=375.603% Quality=100.0%[0m
+[0;32mI (5068) APP: 🚀 Performance: 2531.8 samples/sec[0m
+[0;32mI (5108) APP: DC=53240 AC=10830.4(20.342%) ❌ LED=0x1F[0m
+[0;32mI (5138) APP: DC=52814 AC=717.4(1.358%) ✅ LED=0x1F[0m
+[0;32mI (5168) APP: DC=52785 AC=39.4(0.075%) ✅ LED=0x1F[0m
+[0;32mI (5168) APP: ⏱️  Uptime: 2.9s | Samples: 7253 (6274 valid, 86.5%)[0m
+[0;32mI (5168) APP: 📊 Events: Motion=0 | Quality=979 | HR=0 | SpO2=771[0m
+[0;32mI (5178) APP: 📈 AC/DC: Min=0.010% Avg=1.002% Max=375.603% Quality=7.5%[0m
+[0;32mI (5188) APP: 🚀 Performance: 2532.9 samples/sec[0m
+[0;32mI (5188) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5218) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5228) APP: DC=53015 AC=1051.5(1.983%) ✅ LED=0x3F[0m
+[0;32mI (5228) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5228) APP: 💡 LED: 0x1F (AC=893.3, 1.685%)[0m
+[0;32mI (5268) APP: DC=52647 AC=561.5(1.066%) ✅ LED=0x1F[0m
+[0;32mI (5288) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5288) APP: 💡 LED: 0x3F (AC=2.1, 0.004%)[0m
+[0;32mI (5298) APP: DC=52692 AC=4.6(0.009%) ❌ LED=0x3F[0m
+[0;32mI (5298) APP: ⏱️  Uptime: 3.0s | Samples: 7553 (6494 valid, 86.0%)[0m
+[0;32mI (5298) APP: 📊 Events: Motion=0 | Quality=1059 | HR=0 | SpO2=778[0m
+[0;32mI (5308) APP: 📈 AC/DC: Min=0.010% Avg=0.162% Max=375.603% Quality=0.9%[0m
+[0;32mI (5318) APP: 🚀 Performance: 2524.5 samples/sec[0m
+[0;32mI (5318) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5328) APP: 💡 LED: 0x1F (AC=1131.5, 2.141%)[0m
+[0;32mI (5348) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5358) APP: DC=53023 AC=66.0(0.124%) ✅ LED=0x2F[0m
+[0;32mI (5368) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5378) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5388) APP: 💡 LED: 0x3F (AC=3.6, 0.007%)[0m
+[0;32mI (5398) APP: DC=53188 AC=315.4(0.593%) ✅ LED=0x3F[0m
+[0;32mI (5398) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5398) APP: 💡 LED: 0x1F (AC=223.0, 0.419%)[0m
+[0;32mI (5418) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5428) APP: DC=53278 AC=424.5(0.797%) ✅ LED=0x2F[0m
+[0;32mI (5428) APP: ⏱️  Uptime: 3.1s | Samples: 7853 (6760 valid, 86.1%)[0m
+[0;32mI (5428) APP: 📊 Events: Motion=0 | Quality=1093 | HR=0 | SpO2=829[0m
+[0;32mI (5438) APP: 📈 AC/DC: Min=0.010% Avg=0.927% Max=375.603% Quality=79.7%[0m
+[0;32mI (5448) APP: 🚀 Performance: 2513.3 samples/sec[0m
+[0;32mI (5458) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5488) APP: DC=53447 AC=50.9(0.095%) ✅ LED=0x1F[0m
+[0;32mI (5488) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5508) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5518) APP: DC=53439 AC=125.2(0.234%) ✅ LED=0x1F[0m
+[0;32mI (5548) APP: DC=53337 AC=56.8(0.107%) ✅ LED=0x1F[0m
+[0;32mI (5548) APP: ⏱️  Uptime: 3.2s | Samples: 8153 (7056 valid, 86.5%)[0m
+[0;32mI (5558) APP: 📊 Events: Motion=0 | Quality=1097 | HR=0 | SpO2=872[0m
+[0;32mI (5558) APP: 📈 AC/DC: Min=0.010% Avg=0.184% Max=375.603% Quality=10.7%[0m
+[0;32mI (5568) APP: 🚀 Performance: 2511.3 samples/sec[0m
+[0;32mI (5578) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5578) APP: 💡 LED: 0x3F (AC=20.3, 0.038%)[0m
+[0;32mI (5598) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5598) APP: 💡 LED: 0x1F (AC=98.8, 0.185%)[0m
+[0;32mI (5608) APP: DC=53514 AC=54.6(0.102%) ✅ LED=0x1F[0m
+[0;32mI (5618) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5618) APP: 💡 LED: 0x3F (AC=17.7, 0.033%)[0m
+[0;32mI (5638) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5638) APP: 💡 LED: 0x1F (AC=268.7, 0.501%)[0m
+[0;32mI (5648) APP: DC=53653 AC=120.6(0.225%) ✅ LED=0x1F[0m
+[0;32mI (5678) APP: DC=53534 AC=68.2(0.127%) ✅ LED=0x1F[0m
+[0;32mI (5678) APP: ⏱️  Uptime: 3.4s | Samples: 8453 (7352 valid, 87.0%)[0m
+[0;32mI (5678) APP: 📊 Events: Motion=0 | Quality=1101 | HR=0 | SpO2=927[0m
+[0;32mI (5688) APP: 📈 AC/DC: Min=0.010% Avg=0.359% Max=375.603% Quality=12.7%[0m
+[0;32mI (5698) APP: 🚀 Performance: 2505.3 samples/sec[0m
+[0;32mI (5708) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5708) APP: 💡 LED: 0x3F (AC=7.9, 0.015%)[0m
+[0;32mI (5728) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5738) APP: DC=53467 AC=15.9(0.030%) ❌ LED=0x2F[0m
+[0;32mI (5748) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (5768) APP: DC=53467 AC=2.0(0.004%) ❌ LED=0x3F[0m
+[0;33mW (5788) APP: 💡 Adjust finger position[0m
+[0;32mI (5798) APP: DC=53474 AC=0.3(0.000%) ❌ LED=0x3F[0m
+[0;32mI (5798) APP: ⏱️  Uptime: 3.5s | Samples: 8753 (7410 valid, 84.7%)[0m
+[0;32mI (5798) APP: 📊 Events: Motion=0 | Quality=1343 | HR=0 | SpO2=932[0m
+[0;32mI (5808) APP: 📈 AC/DC: Min=0.010% Avg=0.050% Max=375.603% Quality=0.0%[0m
+[0;32mI (5818) APP: 🚀 Performance: 2504.3 samples/sec[0m
+[0;32mI (5838) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5838) APP: 💡 LED: 0x1F (AC=6800.3, 10.884%)[0m
+[0;32mI (5858) APP: DC=81227 AC=6928.6(8.530%) ✅ LED=0x1F[0m
+[0;32mI (5888) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (5888) APP: DC=77087 AC=647.9(0.841%) ✅ LED=0x2F[0m
+[0;32mI (5898) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (5918) APP: DC=67806 AC=671.5(0.990%) ✅ LED=0x1F[0m
+[0;32mI (5918) APP: ⏱️  Uptime: 3.6s | Samples: 9053 (7681 valid, 84.8%)[0m
+[0;32mI (5928) APP: 📊 Events: Motion=0 | Quality=1372 | HR=0 | SpO2=932[0m
+[0;32mI (5928) APP: 📈 AC/DC: Min=0.010% Avg=3.947% Max=375.603% Quality=99.0%[0m
+[0;32mI (5938) APP: 🚀 Performance: 2504.2 samples/sec[0m
+[0;32mI (5978) APP: DC=75396 AC=2765.7(3.668%) ✅ LED=0x1F[0m
+[0;32mI (6008) APP: DC=86886 AC=2489.0(2.865%) ✅ LED=0x1F[0m
+[0;32mI (6038) APP: DC=74073 AC=2814.9(3.800%) ✅ LED=0x1F[0m
+[0;32mI (6038) APP: ⏱️  Uptime: 3.7s | Samples: 9353 (7940 valid, 84.9%)[0m
+[0;32mI (6038) APP: 📊 Events: Motion=0 | Quality=1413 | HR=0 | SpO2=932[0m
+[0;32mI (6048) APP: 📈 AC/DC: Min=0.010% Avg=11.418% Max=375.603% Quality=100.0%[0m
+[0;32mI (6058) APP: 🚀 Performance: 2506.0 samples/sec[0m
+[0;32mI (6088) APP: DC=52839 AC=2851.5(5.396%) ✅ LED=0x1F[0m
+[0;32mI (6128) APP: DC=52845 AC=127.6(0.241%) ✅ LED=0x1F[0m
+[0;32mI (6138) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (6138) APP: 💡 LED: 0x3F (AC=22.7, 0.043%)[0m
+[0;32mI (6158) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (6158) APP: 💡 LED: 0x1F (AC=3371.7, 5.244%)[0m
+[0;32mI (6158) APP: DC=64299 AC=3371.7(5.244%) ✅ LED=0x1F[0m
+[0;32mI (6168) APP: ⏱️  Uptime: 3.9s | Samples: 9653 (8194 valid, 84.9%)[0m
+[0;32mI (6168) APP: 📊 Events: Motion=0 | Quality=1459 | HR=0 | SpO2=932[0m
+[0;32mI (6178) APP: 📈 AC/DC: Min=0.010% Avg=10.738% Max=375.603% Quality=100.0%[0m
+[0;32mI (6188) APP: 🚀 Performance: 2502.7 samples/sec[0m
+[0;32mI (6218) APP: DC=53098 AC=4588.0(8.641%) ✅ LED=0x1F[0m
+[0;32mI (6258) APP: DC=52951 AC=274.8(0.519%) ✅ LED=0x1F[0m
+[0;32mI (6268) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (6288) APP: DC=52950 AC=12.2(0.023%) ❌ LED=0x2F[0m
+[0;32mI (6288) APP: ⏱️  Uptime: 4.0s | Samples: 9953 (8451 valid, 84.9%)[0m
+[0;32mI (6288) APP: 📊 Events: Motion=0 | Quality=1502 | HR=0 | SpO2=932[0m
+[0;32mI (6298) APP: 📈 AC/DC: Min=0.010% Avg=0.490% Max=375.603% Quality=2.3%[0m
+[0;32mI (6298) APP: 🚀 Performance: 2500.4 samples/sec[0m
+[0;32mI (6308) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (6348) APP: DC=53256 AC=66.6(0.125%) ✅ LED=0x1F[0m
+[0;32mI (6358) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (6378) APP: DC=52967 AC=13.4(0.025%) ❌ LED=0x2F[0m
+[0;32mI (6378) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (6398) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (6398) APP: 💡 LED: 0x1F (AC=391.0, 0.734%)[0m
+[0;32mI (6408) APP: DC=53267 AC=121.3(0.228%) ✅ LED=0x1F[0m
+[0;32mI (6408) APP: ⏱️  Uptime: 4.1s | Samples: 10253 (8722 valid, 85.1%)[0m
+[0;32mI (6408) APP: 📊 Events: Motion=0 | Quality=1531 | HR=0 | SpO2=932[0m
+[0;32mI (6418) APP: 📈 AC/DC: Min=0.010% Avg=0.663% Max=375.603% Quality=22.8%[0m
+[0;32mI (6428) APP: 🚀 Performance: 2497.9 samples/sec[0m
+[0;32mI (6448) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (6468) APP: DC=53289 AC=1212.6(2.276%) ✅ LED=0x2F[0m
+[0;32mI (6468) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (6498) APP: DC=88682 AC=8907.0(10.044%) ✅ LED=0x1F[0m
+[0;32mI (6528) APP: DC=62810 AC=5681.5(9.045%) ✅ LED=0x1F[0m
+[0;32mI (6528) APP: ⏱️  Uptime: 4.2s | Samples: 10553 (8965 valid, 85.0%)[0m
+[0;32mI (6528) APP: 📊 Events: Motion=0 | Quality=1588 | HR=0 | SpO2=932[0m
+[0;32mI (6538) APP: 📈 AC/DC: Min=0.010% Avg=9.157% Max=375.603% Quality=100.0%[0m
+[0;32mI (6548) APP: 🚀 Performance: 2498.6 samples/sec[0m
+[0;32mI (6578) APP: DC=67779 AC=2057.6(3.036%) ✅ LED=0x1F[0m
+[0;32mI (6618) APP: DC=69612 AC=548.7(0.788%) ✅ LED=0x1F[0m
+[0;32mI (6648) APP: DC=73746 AC=828.4(1.123%) ✅ LED=0x1F[0m
+[0;32mI (6648) APP: ⏱️  Uptime: 4.3s | Samples: 10853 (9233 valid, 85.1%)[0m
+[0;32mI (6648) APP: 📊 Events: Motion=0 | Quality=1620 | HR=1 | SpO2=935[0m
+[0;32mI (6658) APP: 📈 AC/DC: Min=0.010% Avg=1.487% Max=375.603% Quality=100.0%[0m
+[0;32mI (6668) APP: 🚀 Performance: 2499.6 samples/sec[0m
+[0;32mI (6698) APP: DC=74841 AC=42.7(0.057%) ✅ LED=0x1F[0m
+[0;32mI (6738) APP: DC=76098 AC=270.4(0.355%) ✅ LED=0x1F[0m
+[0;32mI (6768) APP: DC=70829 AC=1088.6(1.537%) ✅ LED=0x1F[0m
+[0;32mI (6768) APP: ⏱️  Uptime: 4.5s | Samples: 11153 (9527 valid, 85.4%)[0m
+[0;32mI (6768) APP: 📊 Events: Motion=0 | Quality=1626 | HR=1 | SpO2=946[0m
+[0;32mI (6778) APP: 📈 AC/DC: Min=0.010% Avg=1.686% Max=375.603% Quality=100.0%[0m
+[0;32mI (6788) APP: 🚀 Performance: 2500.3 samples/sec[0m
+[0;32mI (6818) APP: DC=52832 AC=4176.2(7.905%) ✅ LED=0x1F[0m
+[0;32mI (6858) APP: DC=61129 AC=1832.8(2.998%) ✅ LED=0x1F[0m
+[0;32mI (6888) APP: DC=70451 AC=1574.5(2.235%) ✅ LED=0x1F[0m
+[0;32mI (6888) APP: ⏱️  Uptime: 4.6s | Samples: 11453 (9814 valid, 85.7%)[0m
+[0;32mI (6888) APP: 📊 Events: Motion=0 | Quality=1639 | HR=1 | SpO2=985[0m
+[0;32mI (6898) APP: 📈 AC/DC: Min=0.010% Avg=3.673% Max=375.603% Quality=100.0%[0m
+[0;32mI (6908) APP: 🚀 Performance: 2500.3 samples/sec[0m
+[0;32mI (6938) APP: DC=62005 AC=2710.3(4.371%) ✅ LED=0x1F[0m
+[0;32mI (6978) APP: DC=53716 AC=2233.0(4.157%) ✅ LED=0x1F[0m
+[0;32mI (7008) APP: DC=77254 AC=3994.0(5.170%) ✅ LED=0x1F[0m
+[0;32mI (7008) APP: ⏱️  Uptime: 4.7s | Samples: 11753 (10076 valid, 85.7%)[0m
+[0;32mI (7008) APP: 📊 Events: Motion=0 | Quality=1677 | HR=2 | SpO2=1022[0m
+[0;32mI (7018) APP: 📈 AC/DC: Min=0.010% Avg=11.003% Max=375.603% Quality=100.0%[0m
+[0;32mI (7028) APP: 🚀 Performance: 2500.5 samples/sec[0m
+[0;32mI (7058) APP: DC=114505 AC=7424.0(6.484%) ✅ LED=0x1F[0m
+[0;32mI (7098) APP: DC=114426 AC=369.3(0.323%) ✅ LED=0x1F[0m
+[0;32mI (7128) APP: DC=74974 AC=8267.6(11.027%) ✅ LED=0x1F[0m
+[0;32mI (7128) APP: ⏱️  Uptime: 4.8s | Samples: 12053 (10346 valid, 85.8%)[0m
+[0;32mI (7128) APP: 📊 Events: Motion=0 | Quality=1707 | HR=2 | SpO2=1106[0m
+[0;32mI (7138) APP: 📈 AC/DC: Min=0.010% Avg=9.041% Max=375.603% Quality=100.0%[0m
+[0;32mI (7148) APP: 🚀 Performance: 2499.4 samples/sec[0m
+[0;32mI (7178) APP: DC=67936 AC=419.2(0.617%) ✅ LED=0x1F[0m
+[0;32mI (7218) APP: DC=53660 AC=3532.1(6.582%) ✅ LED=0x1F[0m
+[0;32mI (7248) APP: DC=52590 AC=255.1(0.485%) ✅ LED=0x1F[0m
+[0;32mI (7248) APP: ⏱️  Uptime: 4.9s | Samples: 12353 (10592 valid, 85.7%)[0m
+[0;32mI (7248) APP: 📊 Events: Motion=0 | Quality=1761 | HR=3 | SpO2=1151[0m
+[0;32mI (7258) APP: 📈 AC/DC: Min=0.010% Avg=2.418% Max=375.603% Quality=48.5%[0m
+[0;32mI (7268) APP: 🚀 Performance: 2499.0 samples/sec[0m
+[0;32mI (7288) MAX30102: 💡 LED current: RED=0x2F, IR=0x2F[0m
+[0;32mI (7308) APP: DC=52597 AC=10.1(0.019%) ❌ LED=0x2F[0m
+[0;32mI (7308) MAX30102: 💡 LED current: RED=0x3F, IR=0x3F[0m
+[0;32mI (7338) APP: DC=52624 AC=6.3(0.012%) ❌ LED=0x3F[0m
+[0;32mI (7368) APP: DC=52662 AC=9.1(0.017%) ❌ LED=0x3F[0m
+[0;32mI (7368) APP: ⏱️  Uptime: 5.1s | Samples: 12653 (10722 valid, 84.7%)[0m
+[0;32mI (7368) APP: 📊 Events: Motion=0 | Quality=1931 | HR=3 | SpO2=1180[0m
+[0;32mI (7378) APP: 📈 AC/DC: Min=0.010% Avg=0.059% Max=375.603% Quality=1.7%[0m
+[0;32mI (7388) APP: 🚀 Performance: 2498.6 samples/sec[0m
+[0;32mI (7398) MAX30102: 💡 LED current: RED=0x1F, IR=0x1F[0m
+[0;32mI (7398) APP: 💡 LED: 0x1F (AC=6966.0, 13.015%)[0m
+[0;32mI (7428) APP: DC=63609 AC=1566.2(2.462%) ✅ LED=0x1F[0m
+[0;32mI (7468) APP: DC=69666 AC=1368.2(1.964%) ✅ LED=0x1F[0m
+[0;32mI (7498) APP: DC=53683 AC=3937.5(7.335%) ✅ LED=0x1F[0m
+[0;32mI (7498) APP: ⏱️  Uptime: 5.2s | Samples: 12953 (11010 valid, 85.0%)[0m
+[0;32mI (7498) APP: 📊 Events: Motion=0 | Quality=1943 | HR=3 | SpO2=1180[0m
+[0;32mI (7508) APP: 📈 AC/DC: Min=0.010% Avg=5.241% Max=375.603% Quality=100.0%[0m
+[0;32mI (7508) APP: 🚀 Performance: 2495.7 samples/sec[0m

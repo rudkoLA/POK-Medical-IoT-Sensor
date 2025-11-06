@@ -1,0 +1,512 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <math.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_timer.h"
+#include "esp_log.h"
+#include "driver/i2c_master.h"
+
+#include "max30102.h"
+#include "filters.h"
+#include "hr_algo.h"
+#include "spo2_algo.h"
+
+static const char *TAG = "APP";
+
+// ==== I2C CONFIG ====
+#define I2C_MASTER_SCL_IO          9
+#define I2C_MASTER_SDA_IO          8
+#define I2C_MASTER_PORT            I2C_NUM_0
+#define I2C_MASTER_FREQ_HZ         400000
+
+// I2C дескриптор
+static i2c_master_bus_handle_t i2c_bus_handle = NULL;
+
+// ==== ОПТИМІЗОВАНА ДЕТЕКЦІЯ ПАЛЬЦЯ ====
+#define AMBIENT_SAMPLES            15
+#define DETECT_MULTIPLIER          2.0f
+#define DETECT_MIN_ABS             2000
+#define REMOVE_FRACTION            0.35f
+#define STABLE_COUNT               3
+
+// ==== ОПТИМІЗОВАНІ НАЛАШТУВАННЯ ФІЛЬТРІВ ====
+#define WARMUP_SAMPLES             150
+#define REPORT_EVERY               100
+#define LOOP_DELAY_MS              3
+
+// ==== ОПТИМІЗОВАНІ НАЛАШТУВАННЯ ЯКОСТІ СИГНАЛУ ====
+#define MIN_AC_DC_ABS              5.0f      // Зменшили мінімальну амплітуду
+#define MIN_AC_DC_RATIO            0.0003f   // 0.03% (менш жорстко)
+#define MAX_AC_DC_RATIO            0.15f     // 15% (збільшили максимум)
+#define QUALITY_ALPHA              0.02f
+
+// ==== ПОКРАЩЕНА СТАБІЛІЗАЦІЯ ====
+#define DC_DROP_THRESHOLD          0.40f     // Менш чутливий до дріфту
+#define DERIV_LIMIT                0.20f     // Менш чутливий до руху
+#define DERIV_SMOOTH_ALPHA         0.05f     // Повільніше реагування
+
+// ==== ОПТИМІЗОВАНІ LED РІВНІ ====
+#define LED_LOW                    0x1F      // ~7.5mA
+#define LED_MEDIUM                 0x2F      // ~12.5mA (стандарт)
+#define LED_HIGH                   0x3F      // ~17.5mA (не 0x4F - занадто яскраво)
+
+// ==== СТРУКТУРИ ДЛЯ ОПТИМІЗОВАНОГО ВІДЛАГОДЖЕННЯ ====
+typedef struct {
+    float min_ac_ratio;
+    float max_ac_ratio;
+    float avg_ac_ratio;
+    int total_samples;
+    int valid_samples;
+    int motion_events;
+    int quality_events;
+    int hr_updates;
+    int spo2_updates;
+    int64_t start_time_us;
+    float current_quality;
+} debug_stats_t;
+
+static debug_stats_t debug_stats = {0};
+
+// ===================== СУЧАСНА I2C ІНІЦІАЛІЗАЦІЯ ======================
+static esp_err_t i2c_init(void)
+{
+    ESP_LOGI(TAG, "🔧 Initializing I2C master...");
+
+    i2c_master_bus_config_t i2c_bus_config = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = I2C_MASTER_PORT,
+        .scl_io_num = I2C_MASTER_SCL_IO,
+        .sda_io_num = I2C_MASTER_SDA_IO,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+
+    esp_err_t ret = i2c_new_master_bus(&i2c_bus_config, &i2c_bus_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "❌ Failed to initialize I2C bus: 0x%X", ret);
+        return ret;
+    }
+
+    // Налаштовуємо MAX30102 як пристрій на шині
+    ret = max30102_setup_i2c(i2c_bus_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "❌ Failed to setup MAX30102 device");
+        i2c_del_master_bus(i2c_bus_handle);
+        i2c_bus_handle = NULL;
+        return ret;
+    }
+
+    ESP_LOGI(TAG, "✅ I2C master and MAX30102 device initialized successfully");
+    return ESP_OK;
+}
+
+// ================== ОПТИМІЗОВАНІ ФІЛЬТРИ/РЕСЕТ =================
+static void reset_filters(ma_filter_ac_t *ir_ma, ma_filter_ac_t *red_ma,
+                         ma_filter_dc_t *ir_dc_ma, ma_filter_dc_t *red_dc_ma,
+                         highpass_t *hp_ir, highpass_t *hp_red)
+{
+    if (ir_ma) ma_ac_init(ir_ma);
+    if (red_ma) ma_ac_init(red_ma);
+    if (ir_dc_ma) ma_dc_init(ir_dc_ma);
+    if (red_dc_ma) ma_dc_init(red_dc_ma);
+    if (hp_ir) highpass_init(hp_ir, 0.5f, 100.0f);
+    if (hp_red) highpass_init(hp_red, 0.5f, 100.0f);
+}
+
+// ================== ПОКРАЩЕНА АДАПТАЦІЯ LED =================
+static uint8_t adaptive_led_control(float ac_ratio, float ac_amplitude, float dc_value)
+{
+    // Базуюся на співвідношенні AC/DC та абсолютній амплітуді
+    if (ac_amplitude < 10.0f || ac_ratio < 0.0005f) {
+        return LED_HIGH;  // Дуже слабкий сигнал
+    } else if (ac_amplitude < 30.0f || ac_ratio < 0.001f) {
+        return LED_MEDIUM; // Середній сигнал
+    } else {
+        return LED_LOW;   // Сильний сигнал
+    }
+}
+
+// ================== ПОКРАЩЕНА ОЦІНКА ЯКОСТІ =================
+static bool evaluate_signal_quality(float ac_ratio, float ac_amplitude, float dc_value, bool motion_detected)
+{
+    // Менш жорсткі критерії
+    bool amplitude_ok = (ac_amplitude >= MIN_AC_DC_ABS);
+    bool ratio_ok = (ac_ratio >= MIN_AC_DC_RATIO) && (ac_ratio <= MAX_AC_DC_RATIO);
+    bool dc_ok = (dc_value >= 10000.0f) && (dc_value <= 200000.0f); // Реальніший діапазон DC
+
+    return amplitude_ok && ratio_ok && dc_ok && !motion_detected;
+}
+
+// ================== ОПТИМІЗОВАНЕ ВІДЛАГОДЖЕННЯ =================
+static inline void update_debug_stats(float ac_ratio, bool is_valid, bool is_motion, float signal_quality)
+{
+    debug_stats.total_samples++;
+    debug_stats.current_quality = signal_quality;
+
+    if (is_valid) {
+        debug_stats.valid_samples++;
+    } else {
+        debug_stats.quality_events++;
+    }
+
+    if (is_motion) {
+        debug_stats.motion_events++;
+    }
+
+    // Швидше оновлення статистики AC/DC
+    if (ac_ratio > 0.0001f) {
+        if (debug_stats.avg_ac_ratio == 0) {
+            debug_stats.avg_ac_ratio = ac_ratio;
+            debug_stats.min_ac_ratio = ac_ratio;
+            debug_stats.max_ac_ratio = ac_ratio;
+        } else {
+            debug_stats.avg_ac_ratio = QUALITY_ALPHA * ac_ratio +
+                                     (1 - QUALITY_ALPHA) * debug_stats.avg_ac_ratio;
+
+            if (ac_ratio < debug_stats.min_ac_ratio) {
+                debug_stats.min_ac_ratio = ac_ratio;
+            }
+            if (ac_ratio > debug_stats.max_ac_ratio) {
+                debug_stats.max_ac_ratio = ac_ratio;
+            }
+        }
+    }
+}
+
+static void print_debug_stats(void)
+{
+    if (debug_stats.total_samples == 0) return;
+
+    float valid_percent = (float)debug_stats.valid_samples / debug_stats.total_samples * 100.0f;
+    int64_t uptime_us = esp_timer_get_time() - debug_stats.start_time_us;
+    float uptime_sec = uptime_us / 1000000.0f;
+
+    ESP_LOGI(TAG, "⏱️  Uptime: %.1fs | Samples: %d (%d valid, %.1f%%)",
+             uptime_sec, debug_stats.total_samples, debug_stats.valid_samples, valid_percent);
+
+    ESP_LOGI(TAG, "📊 Events: Motion=%d | Quality=%d | HR=%d | SpO2=%d",
+             debug_stats.motion_events, debug_stats.quality_events,
+             debug_stats.hr_updates, debug_stats.spo2_updates);
+
+    ESP_LOGI(TAG, "📈 AC/DC: Min=%.3f%% Avg=%.3f%% Max=%.3f%% Quality=%.1f%%",
+             debug_stats.min_ac_ratio * 100, debug_stats.avg_ac_ratio * 100,
+             debug_stats.max_ac_ratio * 100, debug_stats.current_quality * 100);
+
+    if (uptime_sec > 1.0f) {
+        float samples_per_sec = debug_stats.total_samples / uptime_sec;
+        ESP_LOGI(TAG, "🚀 Performance: %.1f samples/sec", samples_per_sec);
+    }
+}
+
+static void reset_debug_stats(void)
+{
+    memset(&debug_stats, 0, sizeof(debug_stats));
+    debug_stats.start_time_us = esp_timer_get_time();
+}
+
+// ===================== ОПТИМІЗОВАНА APP MAIN ======================
+void app_main(void)
+{
+    ESP_LOGI(TAG, "🚀 Starting MAX30102 with Optimized Settings");
+
+    // Ініціалізація I2C
+    if (i2c_init() != ESP_OK) {
+        ESP_LOGE(TAG, "❌ I2C initialization failed");
+        ESP_LOGE(TAG, "🔧 Check: GPIO pins, pull-up resistors, power supply");
+        return;
+    }
+
+    // Ініціалізація MAX30102
+    if (max30102_init() != ESP_OK) {
+        ESP_LOGE(TAG, "❌ MAX30102 initialization failed");
+        return;
+    }
+
+    ESP_LOGI(TAG, "✅ MAX30102 ready");
+
+    // Початкове налаштування LED
+    uint8_t current_led = LED_MEDIUM;
+    max30102_set_led_current(current_led, current_led);
+    ESP_LOGI(TAG, "🔆 Initial LED current: 0x%02X", current_led);
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    // Швидша калібрування
+    ESP_LOGI(TAG, "🔍 Calibrating ambient light...");
+    uint32_t ir_sum = 0, red_sum = 0;
+    int ambient_samples = 0;
+
+    for (int i = 0; i < AMBIENT_SAMPLES; ++i) {
+        max30102_sample_t s;
+        if (max30102_read_sample(&s) == ESP_OK) {
+            ir_sum += s.ir;
+            red_sum += s.red;
+            ambient_samples++;
+        }
+        vTaskDelay(pdMS_TO_TICKS(15));
+    }
+
+    if (ambient_samples == 0) {
+        ESP_LOGE(TAG, "❌ No ambient samples received - sensor not working");
+        return;
+    }
+
+    float ir_baseline = (float)(ir_sum / ambient_samples);
+    float red_baseline = (float)(red_sum / ambient_samples);
+    float detect_threshold = fmaxf(DETECT_MIN_ABS, ir_baseline * DETECT_MULTIPLIER);
+
+    ESP_LOGI(TAG, "🌙 Ambient: IR=%.0f, RED=%.0f | Threshold: %.0f",
+             ir_baseline, red_baseline, detect_threshold);
+
+    // Ініціалізація алгоритмів
+    ESP_LOGI(TAG, "🧠 Initializing algorithms...");
+
+    static ma_filter_ac_t ir_ma, red_ma;
+    static ma_filter_dc_t ir_dc_ma, red_dc_ma;
+    static highpass_t hp_ir, hp_red;
+    static hr_algo_t hr;
+    static spo2_algo_t spo2;
+
+    reset_filters(&ir_ma, &red_ma, &ir_dc_ma, &red_dc_ma, &hp_ir, &hp_red);
+    hr_init(&hr);
+    spo2_init(&spo2);
+    reset_debug_stats();
+
+    // Оптимізовані змінні стану
+    bool finger_detected = false;
+    int stable_cnt = 0;
+    int remove_cnt = 0;
+    float baseline_dc = 0.0f;
+    float prev_dc = 0.0f;
+    float deriv_smooth = 0.0f;
+    int samples = 0;
+    int ok_streak = 0;
+    int debug_counter = 0;
+    int consecutive_no_samples = 0;
+    int no_signal_counter = 0;
+    uint32_t last_led_update = 0;
+    float last_good_ac = 0.0f;
+
+    ESP_LOGI(TAG, "👉 Ready! Place finger on sensor...");
+
+    // Основний цикл
+    while (1) {
+        int64_t loop_start = esp_timer_get_time();
+
+        max30102_sample_t s;
+        esp_err_t read_result = max30102_read_sample(&s);
+
+        if (read_result != ESP_OK) {
+            if (++consecutive_no_samples > 50) {
+                ESP_LOGW(TAG, "⚠️  Sensor communication issues");
+                consecutive_no_samples = 0;
+            }
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
+            continue;
+        }
+        consecutive_no_samples = 0;
+
+        float ir = (float)s.ir;
+        float red = (float)s.red;
+
+        // Оптимізована детекція пальця
+        if (!finger_detected) {
+            bool finger_present = (ir > detect_threshold) && (red > detect_threshold * 0.8f);
+
+            if (finger_present) {
+                if (++stable_cnt >= STABLE_COUNT) {
+                    finger_detected = true;
+                    stable_cnt = 0;
+                    remove_cnt = 0;
+
+                    // Швидший прогрів
+                    ESP_LOGI(TAG, "🔥 Fast warmup...");
+                    for (int i = 0; i < WARMUP_SAMPLES; ++i) {
+                        max30102_sample_t p;
+                        if (max30102_read_sample(&p) == ESP_OK) {
+                            ma_dc_update(&ir_dc_ma, (float)p.ir);
+                            ma_dc_update(&red_dc_ma, (float)p.red);
+                        }
+                        vTaskDelay(pdMS_TO_TICKS(5));
+                    }
+
+                    baseline_dc = ma_dc_update(&ir_dc_ma, ir);
+                    prev_dc = baseline_dc;
+                    deriv_smooth = 0.0f;
+                    ok_streak = 0;
+                    no_signal_counter = 0;
+                    last_good_ac = 0.0f;
+                    reset_debug_stats();
+
+                    ESP_LOGI(TAG, "✅ FINGER DETECTED! Starting measurement...");
+                }
+            } else {
+                stable_cnt = 0;
+                if ((samples % 300) == 0) {
+                    ESP_LOGI(TAG, "… waiting: IR=%.0f/%.0f", ir, detect_threshold);
+                }
+            }
+            samples++;
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
+            continue;
+        }
+
+        // Чутливіше виявлення видалення пальця
+        float remove_threshold = detect_threshold * REMOVE_FRACTION;
+        if (ir < remove_threshold || red < remove_threshold) {
+            if (++remove_cnt >= STABLE_COUNT) {
+                ESP_LOGW(TAG, "👉 Finger removed");
+                finger_detected = false;
+                remove_cnt = 0;
+                print_debug_stats();
+                ESP_LOGI(TAG, "👉 Ready for next measurement...");
+            }
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
+            continue;
+        }
+        remove_cnt = 0;
+
+        // Ефективна фільтрація
+        float ir_dc = ma_dc_update(&ir_dc_ma, ir);
+        float red_dc = ma_dc_update(&red_dc_ma, red);
+        float ir_ac_raw = ir - ir_dc;
+        float red_ac_raw = red - red_dc;
+
+        // High-pass фільтрація для видалення залишкового DC
+        float ir_ac = highpass_update(&hp_ir, ir_ac_raw);
+        float red_ac = highpass_update(&hp_red, red_ac_raw);
+
+        // Moving Average для згладжування AC
+        ir_ac = ma_ac_update(&ir_ma, ir_ac);
+        red_ac = ma_ac_update(&red_ma, red_ac);
+
+        // Стабілізація DC значення
+        if (baseline_dc == 0.0f) {
+            baseline_dc = ir_dc;
+        } else {
+            // Повільна адаптація базової лінії
+            float alpha = 0.001f; // Дуже повільна адаптація
+            baseline_dc = (1 - alpha) * baseline_dc + alpha * ir_dc;
+        }
+
+        samples++;
+        debug_counter++;
+
+        // Покращена детекція руху
+        float dc_deriv = (prev_dc > 1000.0f) ? fabsf(ir_dc - prev_dc) / prev_dc : 0.0f;
+        deriv_smooth = DERIV_SMOOTH_ALPHA * dc_deriv + (1 - DERIV_SMOOTH_ALPHA) * deriv_smooth;
+        prev_dc = ir_dc;
+
+        bool motion_detected = (deriv_smooth > DERIV_LIMIT);
+
+        // Оцінка якості сигналу
+        float ac_ratio = (ir_dc > 0.0f) ? fabsf(ir_ac) / ir_dc : 0.0f;
+        float ac_abs = fabsf(ir_ac);
+        float signal_quality = fminf(ac_ratio / 0.01f, 1.0f); // Нормалізуємо якість 0-1
+
+        bool good_quality = evaluate_signal_quality(ac_ratio, ac_abs, ir_dc, motion_detected);
+
+        update_debug_stats(ac_ratio, good_quality, motion_detected, signal_quality);
+
+        // Адаптивне керування LED
+        if (debug_counter - last_led_update > 50) { // Кожні 50 семплів
+            uint8_t new_led = adaptive_led_control(ac_ratio, ac_abs, ir_dc);
+            if (new_led != current_led) {
+                max30102_set_led_current(new_led, new_led);
+                // Логуємо тільки при значних змінах
+                if (abs((int)new_led - (int)current_led) > 0x10) {
+                    ESP_LOGI(TAG, "💡 LED: 0x%02X (AC=%.1f, %.3f%%)",
+                            new_led, ac_abs, ac_ratio * 100);
+                }
+                current_led = new_led;
+            }
+            last_led_update = debug_counter;
+        }
+
+        // Ефективне діагностичне логування
+        if ((debug_counter % REPORT_EVERY) == 0) {
+            const char* quality_indicator = good_quality ? "✅" : "❌";
+            const char* motion_indicator = motion_detected ? "🚶" : "";
+
+            ESP_LOGI(TAG, "DC=%.0f AC=%.1f(%.3f%%) %s%s LED=0x%02X",
+                    ir_dc, ac_abs, ac_ratio * 100,
+                    quality_indicator, motion_indicator, current_led);
+
+            if ((debug_counter % (REPORT_EVERY * 3)) == 0) {
+                print_debug_stats();
+            }
+        }
+
+        if (!good_quality) {
+            no_signal_counter++;
+            if (no_signal_counter > 150) {
+                ESP_LOGW(TAG, "💡 Adjust finger position");
+                no_signal_counter = 0;
+            }
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
+            continue;
+        }
+        no_signal_counter = 0;
+
+        // Перевірка стабільності сигналу перед оновленням алгоритмів
+        float ac_change = (last_good_ac > 0.0f) ? fabsf(ac_abs - last_good_ac) / fmaxf(ac_abs, 1.0f) : 0.0f;
+
+        if (ac_change < 0.5f) { // Максимальна зміна 50%
+            // Оновлення алгоритмів
+            float bpm = 0.0f;
+            bool hr_ok = hr_update(&hr, ir_ac, esp_timer_get_time(), &bpm);
+            if (hr_ok) {
+                debug_stats.hr_updates++;
+            }
+
+            float spo2_val = 0.0f;
+            bool spo2_ok = spo2_update(&spo2, red_ac, red_dc, ir_ac, ir_dc, &spo2_val);
+            if (spo2_ok && spo2_val >= 70.0f && spo2_val <= 100.0f) {
+                debug_stats.spo2_updates++;
+            } else {
+                spo2_ok = false;
+            }
+
+            // Вивід результатів
+            if (hr_ok) {
+                ok_streak++;
+                if (ok_streak >= 2) { // Швидше відображення результатів
+                    printf("\n");
+                    printf("╔══════════════════════════════╗\n");
+                    printf("║        HEALTH MONITOR        ║\n");
+                    printf("╠══════════════════════════════╣\n");
+                    printf("║ ❤️   Pulse: %3.0f BPM         ║\n", bpm);
+                    if (spo2_ok) {
+                        printf("║ 🫁   SpO2:   %2.0f %%           ║\n", spo2_val);
+                    } else {
+                        printf("║ 🫁   SpO2:   -- %%            ║\n");
+                    }
+                    printf("║ 📶 Quality: %2.0f %%           ║\n", signal_quality * 100);
+                    printf("╚══════════════════════════════╝\n");
+                }
+            } else if (ok_streak > 0) {
+                ok_streak = 0;
+            }
+
+            last_good_ac = ac_abs;
+        }
+
+        // Точний контроль часу для стабільної частоти дискретизації
+        int64_t loop_time = esp_timer_get_time() - loop_start;
+        int32_t delay_needed = LOOP_DELAY_MS * 1000 - (int32_t)loop_time;
+
+        if (delay_needed > 1000) { // Мінімальна затримка 1ms
+            vTaskDelay(pdMS_TO_TICKS(delay_needed / 1000));
+        }
+    }
+
+    // Очищення при виході
+    max30102_cleanup();
+    if (i2c_bus_handle != NULL) {
+        i2c_del_master_bus(i2c_bus_handle);
+    }
+}

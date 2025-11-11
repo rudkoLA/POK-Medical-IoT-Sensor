@@ -1,13 +1,13 @@
 # Target labels
  bootloader
 # Source files and their labels
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader-complete.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/CMakeFiles/bootloader-complete.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

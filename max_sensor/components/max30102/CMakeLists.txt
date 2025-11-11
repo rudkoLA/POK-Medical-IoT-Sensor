@@ -5,5 +5,5 @@ idf_component_register(
         "hr_algo.c"
         "spo2_algo.c"
         INCLUDE_DIRS "."
-        REQUIRES driver esp_timer
+        REQUIRES driver esp_timer esp_driver_i2c
 )

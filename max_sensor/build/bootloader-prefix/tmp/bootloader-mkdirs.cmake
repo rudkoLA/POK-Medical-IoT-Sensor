@@ -4,19 +4,19 @@
 cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY
-  "/home/rusik_99/esp-idf/components/bootloader/subproject"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/tmp"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src"
-  "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/max/esp-idf/components/bootloader/subproject"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/tmp"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src"
+  "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "/home/rusik_99/UCU/POK/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

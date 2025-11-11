@@ -461,6 +461,24 @@ void app_main(void)
             bool hr_ok = hr_update(&hr, ir_ac, esp_timer_get_time(), &bpm);
             if (hr_ok) {
                 debug_stats.hr_updates++;
+
+                // ==== Count beats for 1-minute measurement ====
+                static int beat_count = 0;
+                static int64_t start_time_us = 0;
+
+                if (start_time_us == 0) start_time_us = esp_timer_get_time();
+                beat_count++;
+
+                int64_t elapsed_us = esp_timer_get_time() - start_time_us;
+                float elapsed_sec = elapsed_us / 1000000.0f;
+
+                if (elapsed_sec >= 60.0f) {
+                    float bpm_minute = (float)beat_count * 60.0f / elapsed_sec;
+                    printf("❤️ BPM (1 min): %.0f\n", bpm_minute);
+                    // Reset for next 1-minute interval
+                    beat_count = 0;
+                    start_time_us = esp_timer_get_time();
+                }
             }
 
             float spo2_val = 0.0f;

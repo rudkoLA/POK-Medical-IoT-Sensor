@@ -1,2 +1,0 @@
-/home/max/.espressif/tools/xtensa-esp-elf/esp-15.2.0_20250929/xtensa-esp-elf/bin/xtensa-esp32s3-elf-ar qc libmax30102.a CMakeFiles/__idf_max30102.dir/max30102.c.obj CMakeFiles/__idf_max30102.dir/filters.c.obj CMakeFiles/__idf_max30102.dir/hr_algo.c.obj CMakeFiles/__idf_max30102.dir/spo2_algo.c.obj
-/home/max/.espressif/tools/xtensa-esp-elf/esp-15.2.0_20250929/xtensa-esp-elf/bin/xtensa-esp32s3-elf-ranlib libmax30102.a

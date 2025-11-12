@@ -1,2 +1,2 @@
-source /home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader/gdbinit/symbols
-source /home/max/pok_project_2/POK-Medical-IoT-Sensor/max_sensor/build/bootloader/gdbinit/connect
+source C:/Users/Anton/OneDrive/Documents/GitHub/POK-Medical-IoT-Sensor/max_sensor/build/bootloader/gdbinit/symbols
+source C:/Users/Anton/OneDrive/Documents/GitHub/POK-Medical-IoT-Sensor/max_sensor/build/bootloader/gdbinit/connect

@@ -33,7 +33,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_PASS "" // Ensure this is correct for your network
 #define IOTHUB_HOSTNAME "MedicalIotTest.azure-devices.net"
 #define DEVICE_ID "myiottest"
-#define SAS_TOKEN "SharedAccessSignature sr=MedicalIotTest.azure-devices.net%2Fdevices%2Fmyiottest&sig=s0REorzahiOteeRgy0oTt6RYQzkyhuNN92T5jDRf42s%3D&se=1762963778"
+#define SAS_TOKEN "SharedAccessSignature sr=MedicalIotTest.azure-devices.net%2Fdevices%2Fmyiottest&sig=IxqgSCyx8vkpj24vqXkjngbH83sJKIXeau07k5TD0G4%3D&se=1765398010"
 
 static const char *WIFI_TAG = "wifi_sta_app";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
@@ -395,7 +395,7 @@ static void mqtt_app_start(void)
     }
 }
 
-static void send_telemetry(float bpm)
+static void send_telemetry_bpm(float bpm)
 {
     if (!mqtt_client)
     {
@@ -424,6 +424,42 @@ static void send_telemetry(float bpm)
     else
     {
         ESP_LOGI(TAG, "📤 Sent BPM telemetry (msg_id=%d): %s", msg_id, payload);
+    }
+}
+
+
+static void send_telemetry_spo2(float spo2_val)
+{
+    if (!mqtt_client)
+    {
+        ESP_LOGE(TAG, "❌ MQTT client not initialized");
+        return;
+    }
+
+    // Перевірка на фізіологічну валідність SpO2 (зазвичай 70-100%)
+    if (spo2_val < 70.0f || spo2_val > 100.0f)
+    {
+        ESP_LOGW(TAG, "⚠️ Invalid SpO2 value: %.1f%%. Not sending telemetry.", spo2_val);
+        return;
+    }
+
+    char payload[64];
+    // Формуємо JSON-навантаження: {"spo2": 98.5}
+    snprintf(payload, sizeof(payload), "{\"spo2\":%.1f}", spo2_val);
+
+    int msg_id = esp_mqtt_client_publish(
+        mqtt_client,
+        // Використовуємо той самий Topic для телеметрії
+        "devices/" DEVICE_ID "/messages/events/$.ct=application%2Fjson&$.ce=utf-8",
+        payload, 0, 1, 0);
+
+    if (msg_id < 0)
+    {
+        ESP_LOGE(TAG, "❌ Failed to publish SpO2 telemetry");
+    }
+    else
+    {
+        ESP_LOGI(TAG, "📤 Sent SpO2 telemetry (msg_id=%d): %s", msg_id, payload);
     }
 }
 
@@ -536,6 +572,8 @@ void app_main(void)
     int no_signal_counter = 0;
     uint32_t last_led_update = 0;
     float last_good_ac = 0.0f;
+    static float spo2_sum = 0.0f;
+    static int spo2_count = 0;
 
     ESP_LOGI(TAG, "👉 Ready! Place finger on sensor...");
 
@@ -747,11 +785,22 @@ void app_main(void)
                 if (elapsed_sec >= 60.0f)
                 {
                     float bpm_minute = (float)beat_count * 60.0f / elapsed_sec;
-                    printf("❤️ BPM (1 min): %.0f\n", bpm_minute);
-                    send_telemetry(bpm_minute);
+                    printf("❤️❤️❤️❤️❤️❤️❤️❤️❤️ BPM (1 min): %.0f\n", bpm_minute);
+                    send_telemetry_bpm(bpm_minute);
                     // Reset for next 1-minute interval
+                    if (spo2_count > 0)
+                    {
+                        float spo2_average = spo2_sum / spo2_count;
+                        printf("🫁🫁🫁🫁🫁🫁🫁🫁🫁 SpO2 (1 min avg): %.1f%%\n", spo2_average);
+                        // Якщо потрібно, тут ви можете викликати функцію send_telemetry для SpO2
+                        // send_telemetry_spo2(spo2_average);
+                        send_telemetry_spo2(spo2_average);
+                    }
+
                     beat_count = 0;
                     start_time_us = esp_timer_get_time();
+                    spo2_sum = 0.0f;
+                    spo2_count = 0;
                 }
             }
 
@@ -760,6 +809,8 @@ void app_main(void)
             if (spo2_ok && spo2_val >= 70.0f && spo2_val <= 100.0f)
             {
                 debug_stats.spo2_updates++;
+                spo2_sum += spo2_val;
+                spo2_count++;
             }
             else
             {

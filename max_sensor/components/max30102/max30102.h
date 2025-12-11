@@ -25,7 +25,7 @@
 #define REG_PILOT_PA        0x10
 #define REG_PART_ID         0xFF
 
-// Mode configuration
+
 #define MAX30102_MODE_SPO2  0x03
 
 typedef struct {
@@ -33,13 +33,11 @@ typedef struct {
     uint32_t ir;
 } max30102_sample_t;
 
-// Основні функції
 esp_err_t max30102_init(void);
 esp_err_t max30102_read_sample(max30102_sample_t *sample);
 esp_err_t max30102_set_led_current(uint8_t red_hex, uint8_t ir_hex);
 
-// I2C setup/cleanup функції
 esp_err_t max30102_setup_i2c(i2c_master_bus_handle_t bus_handle);
 esp_err_t max30102_cleanup(void);
 
-#endif // MAX30102_H
+#endif

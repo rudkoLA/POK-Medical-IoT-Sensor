@@ -28,9 +28,8 @@
 static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 
-// Wi-Fi credentials
 #define WIFI_SSID "UCU_Guest"
-#define WIFI_PASS "" // Ensure this is correct for your network
+#define WIFI_PASS ""
 #define IOTHUB_HOSTNAME "MedicalIotTest.azure-devices.net"
 #define DEVICE_ID "myiottest"
 #define SAS_TOKEN "SharedAccessSignature sr=MedicalIotTest.azure-devices.net%2Fdevices%2Fmyiottest&sig=IxqgSCyx8vkpj24vqXkjngbH83sJKIXeau07k5TD0G4%3D&se=1765398010"
@@ -40,44 +39,37 @@ static esp_mqtt_client_handle_t mqtt_client = NULL;
 
 static const char *TAG = "APP";
 
-// ==== I2C CONFIG ====
 #define I2C_MASTER_SCL_IO 9
 #define I2C_MASTER_SDA_IO 8
 #define I2C_MASTER_PORT I2C_NUM_0
 #define I2C_MASTER_FREQ_HZ 400000
 
-// I2C дескриптор
 static i2c_master_bus_handle_t i2c_bus_handle = NULL;
 
-// ==== ОПТИМІЗОВАНА ДЕТЕКЦІЯ ПАЛЬЦЯ ====
+
 #define AMBIENT_SAMPLES 15
 #define DETECT_MULTIPLIER 2.0f
 #define DETECT_MIN_ABS 2000
 #define REMOVE_FRACTION 0.35f
 #define STABLE_COUNT 3
 
-// ==== ОПТИМІЗОВАНІ НАЛАШТУВАННЯ ФІЛЬТРІВ ====
 #define WARMUP_SAMPLES 150
 #define REPORT_EVERY 100
 #define LOOP_DELAY_MS 3
 
-// ==== ОПТИМІЗОВАНІ НАЛАШТУВАННЯ ЯКОСТІ СИГНАЛУ ====
-#define MIN_AC_DC_ABS 5.0f      // Зменшили мінімальну амплітуду
-#define MIN_AC_DC_RATIO 0.0003f // 0.03% (менш жорстко)
-#define MAX_AC_DC_RATIO 0.15f   // 15% (збільшили максимум)
+#define MIN_AC_DC_ABS 5.0f
+#define MIN_AC_DC_RATIO 0.0003f
+#define MAX_AC_DC_RATIO 0.15f
 #define QUALITY_ALPHA 0.02f
 
-// ==== ПОКРАЩЕНА СТАБІЛІЗАЦІЯ ====
-#define DC_DROP_THRESHOLD 0.40f  // Менш чутливий до дріфту
-#define DERIV_LIMIT 0.20f        // Менш чутливий до руху
-#define DERIV_SMOOTH_ALPHA 0.05f // Повільніше реагування
+#define DC_DROP_THRESHOLD 0.40f
+#define DERIV_LIMIT 0.20f
+#define DERIV_SMOOTH_ALPHA 0.05f
 
-// ==== ОПТИМІЗОВАНІ LED РІВНІ ====
-#define LED_LOW 0x1F    // ~7.5mA
-#define LED_MEDIUM 0x2F // ~12.5mA (стандарт)
-#define LED_HIGH 0x3F   // ~17.5mA (не 0x4F - занадто яскраво)
+#define LED_LOW 0x1F
+#define LED_MEDIUM 0x2F
+#define LED_HIGH 0x3F
 
-// ==== СТРУКТУРИ ДЛЯ ОПТИМІЗОВАНОГО ВІДЛАГОДЖЕННЯ ====
 typedef struct
 {
     float min_ac_ratio;
@@ -95,14 +87,12 @@ typedef struct
 
 static debug_stats_t debug_stats = {0};
 
-// ==== Алгоритми для пульсу та SpO2 ====
 static hr_algo_t hr;
 static spo2_algo_t spo2;
 
-// ===================== СУЧАСНА I2C ІНІЦІАЛІЗАЦІЯ ======================
 static esp_err_t i2c_init(void)
 {
-    ESP_LOGI(TAG, "🔧 Initializing I2C master...");
+    ESP_LOGI(TAG, "Initializing I2C master...");
 
     i2c_master_bus_config_t i2c_bus_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
@@ -120,7 +110,6 @@ static esp_err_t i2c_init(void)
         return ret;
     }
 
-    // Налаштовуємо MAX30102 як пристрій на шині
     ret = max30102_setup_i2c(i2c_bus_handle);
     if (ret != ESP_OK)
     {
@@ -134,7 +123,6 @@ static esp_err_t i2c_init(void)
     return ESP_OK;
 }
 
-// ================== ОПТИМІЗОВАНІ ФІЛЬТРИ/РЕСЕТ =================
 static void reset_filters(ma_filter_ac_t *ir_ma, ma_filter_ac_t *red_ma,
                           ma_filter_dc_t *ir_dc_ma, ma_filter_dc_t *red_dc_ma,
                           highpass_t *hp_ir, highpass_t *hp_red)
@@ -153,36 +141,31 @@ static void reset_filters(ma_filter_ac_t *ir_ma, ma_filter_ac_t *red_ma,
         highpass_init(hp_red, 0.5f, 100.0f);
 }
 
-// ================== ПОКРАЩЕНА АДАПТАЦІЯ LED =================
 static uint8_t adaptive_led_control(float ac_ratio, float ac_amplitude, float dc_value)
 {
-    // Базуюся на співвідношенні AC/DC та абсолютній амплітуді
     if (ac_amplitude < 10.0f || ac_ratio < 0.0005f)
     {
-        return LED_HIGH; // Дуже слабкий сигнал
+        return LED_HIGH;
     }
     else if (ac_amplitude < 30.0f || ac_ratio < 0.001f)
     {
-        return LED_MEDIUM; // Середній сигнал
+        return LED_MEDIUM;
     }
     else
     {
-        return LED_LOW; // Сильний сигнал
+        return LED_LOW;
     }
 }
 
-// ================== ПОКРАЩЕНА ОЦІНКА ЯКОСТІ =================
 static bool evaluate_signal_quality(float ac_ratio, float ac_amplitude, float dc_value, bool motion_detected)
 {
-    // Менш жорсткі критерії
     bool amplitude_ok = (ac_amplitude >= MIN_AC_DC_ABS);
     bool ratio_ok = (ac_ratio >= MIN_AC_DC_RATIO) && (ac_ratio <= MAX_AC_DC_RATIO);
-    bool dc_ok = (dc_value >= 10000.0f) && (dc_value <= 200000.0f); // Реальніший діапазон DC
+    bool dc_ok = (dc_value >= 10000.0f) && (dc_value <= 200000.0f);
 
     return amplitude_ok && ratio_ok && dc_ok && !motion_detected;
 }
 
-// ================== ОПТИМІЗОВАНЕ ВІДЛАГОДЖЕННЯ =================
 static inline void update_debug_stats(float ac_ratio, bool is_valid, bool is_motion, float signal_quality)
 {
     debug_stats.total_samples++;
@@ -202,7 +185,6 @@ static inline void update_debug_stats(float ac_ratio, bool is_valid, bool is_mot
         debug_stats.motion_events++;
     }
 
-    // Швидше оновлення статистики AC/DC
     if (ac_ratio > 0.0001f)
     {
         if (debug_stats.avg_ac_ratio == 0)
@@ -237,21 +219,21 @@ static void print_debug_stats(void)
     int64_t uptime_us = esp_timer_get_time() - debug_stats.start_time_us;
     float uptime_sec = uptime_us / 1000000.0f;
 
-    ESP_LOGI(TAG, "⏱️  Uptime: %.1fs | Samples: %d (%d valid, %.1f%%)",
+    ESP_LOGI(TAG, "Uptime: %.1fs | Samples: %d (%d valid, %.1f%%)",
              uptime_sec, debug_stats.total_samples, debug_stats.valid_samples, valid_percent);
 
-    ESP_LOGI(TAG, "📊 Events: Motion=%d | Quality=%d | HR=%d | SpO2=%d",
+    ESP_LOGI(TAG, "Events: Motion=%d | Quality=%d | HR=%d | SpO2=%d",
              debug_stats.motion_events, debug_stats.quality_events,
              debug_stats.hr_updates, debug_stats.spo2_updates);
 
-    ESP_LOGI(TAG, "📈 AC/DC: Min=%.3f%% Avg=%.3f%% Max=%.3f%% Quality=%.1f%%",
+    ESP_LOGI(TAG, "AC/DC: Min=%.3f%% Avg=%.3f%% Max=%.3f%% Quality=%.1f%%",
              debug_stats.min_ac_ratio * 100, debug_stats.avg_ac_ratio * 100,
              debug_stats.max_ac_ratio * 100, debug_stats.current_quality * 100);
 
     if (uptime_sec > 1.0f)
     {
         float samples_per_sec = debug_stats.total_samples / uptime_sec;
-        ESP_LOGI(TAG, "🚀 Performance: %.1f samples/sec", samples_per_sec);
+        ESP_LOGI(TAG, "Performance: %.1f samples/sec", samples_per_sec);
     }
 }
 
@@ -261,7 +243,6 @@ static void reset_debug_stats(void)
     debug_stats.start_time_us = esp_timer_get_time();
 }
 
-// Обробник подій Wi-Fi
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data)
 {
@@ -297,20 +278,16 @@ void wifi_init_sta(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    // 1. Ініціалізація TCP/IP стеку
+
     ESP_ERROR_CHECK(esp_netif_init());
 
-    // 2. Створення дефолтного event loop
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    // 3. Створення Wi-Fi інтерфейсу STA
     esp_netif_create_default_wifi_sta();
 
-    // 4. Ініціалізація Wi-Fi драйвера
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    // 5. Реєстрація обробників подій Wi-Fi та IP
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
                                                         &wifi_event_handler,
@@ -323,7 +300,6 @@ void wifi_init_sta(void)
                                                         NULL,
                                                         NULL));
 
-    // 6. Налаштування Wi-Fi конфігурації STA
     wifi_config_t wifi_config = {
         .sta = {
             .ssid = WIFI_SSID,
@@ -353,10 +329,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGE(TAG, "❌ MQTT error occurred");
         break;
     case MQTT_EVENT_PUBLISHED:
-        ESP_LOGI(TAG, "📨 Message published successfully (msg_id=%d)", event->msg_id);
+        ESP_LOGI(TAG, "Message published successfully (msg_id=%d)", event->msg_id);
         break;
     case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "📥 Incoming data: topic=%.*s, data=%.*s",
+        ESP_LOGI(TAG, "Incoming data: topic=%.*s, data=%.*s",
                  event->topic_len, event->topic,
                  event->data_len, event->data);
         break;
@@ -383,7 +359,7 @@ static void mqtt_app_start(void)
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
-    ESP_LOGI(TAG, "🌐 Connecting to Azure IoT Hub...");
+    ESP_LOGI(TAG, "Connecting to Azure IoT Hub...");
     esp_err_t err = esp_mqtt_client_start(mqtt_client);
     if (err != ESP_OK)
     {
@@ -391,7 +367,7 @@ static void mqtt_app_start(void)
     }
     else
     {
-        ESP_LOGI(TAG, "🚀 MQTT client started successfully");
+        ESP_LOGI(TAG, "MQTT client started successfully");
     }
 }
 
@@ -405,7 +381,7 @@ static void send_telemetry_bpm(float bpm)
 
     if (bpm <= 0 || bpm > 300)
     {
-        ESP_LOGW(TAG, "⚠️ Invalid BPM value: %.1f", bpm);
+        ESP_LOGW(TAG, "Invalid BPM value: %.1f", bpm);
         return;
     }
 
@@ -423,7 +399,7 @@ static void send_telemetry_bpm(float bpm)
     }
     else
     {
-        ESP_LOGI(TAG, "📤 Sent BPM telemetry (msg_id=%d): %s", msg_id, payload);
+        ESP_LOGI(TAG, "Sent BPM telemetry (msg_id=%d): %s", msg_id, payload);
     }
 }
 
@@ -436,20 +412,17 @@ static void send_telemetry_spo2(float spo2_val)
         return;
     }
 
-    // Перевірка на фізіологічну валідність SpO2 (зазвичай 70-100%)
     if (spo2_val < 70.0f || spo2_val > 100.0f)
     {
-        ESP_LOGW(TAG, "⚠️ Invalid SpO2 value: %.1f%%. Not sending telemetry.", spo2_val);
+        ESP_LOGW(TAG, "Invalid SpO2 value: %.1f%%. Not sending telemetry.", spo2_val);
         return;
     }
 
     char payload[64];
-    // Формуємо JSON-навантаження: {"spo2": 98.5}
     snprintf(payload, sizeof(payload), "{\"spo2\":%.1f}", spo2_val);
 
     int msg_id = esp_mqtt_client_publish(
         mqtt_client,
-        // Використовуємо той самий Topic для телеметрії
         "devices/" DEVICE_ID "/messages/events/$.ct=application%2Fjson&$.ce=utf-8",
         payload, 0, 1, 0);
 
@@ -459,18 +432,16 @@ static void send_telemetry_spo2(float spo2_val)
     }
     else
     {
-        ESP_LOGI(TAG, "📤 Sent SpO2 telemetry (msg_id=%d): %s", msg_id, payload);
+        ESP_LOGI(TAG, "Sent SpO2 telemetry (msg_id=%d): %s", msg_id, payload);
     }
 }
 
-// ===================== ОПТИМІЗОВАНА APP MAIN ======================
 void app_main(void)
 {
-    ESP_LOGI(TAG, "🚀 Starting MAX30102 with Optimized Settings");
+    ESP_LOGI(TAG, "Starting MAX30102 with Optimized Settings");
 
     wifi_init_sta();
 
-    // Wait for Wi-Fi connection before doing anything network-related
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
                                            WIFI_CONNECTED_BIT,
                                            pdFALSE,
@@ -486,14 +457,12 @@ void app_main(void)
         return;
     }
 
-    // Test DNS
     struct addrinfo *res;
     int err = getaddrinfo("MedicalIotTest.azure-devices.net", NULL, NULL, &res);
     ESP_LOGI(TAG, "DNS lookup result: %d", err);
     if (err == 0)
         freeaddrinfo(res);
 
-    // Init I2C + sensor
     if (i2c_init() != ESP_OK)
     {
         ESP_LOGE(TAG, "❌ I2C initialization failed");
@@ -508,17 +477,14 @@ void app_main(void)
 
     ESP_LOGI(TAG, "✅ MAX30102 ready");
 
-    // Start Azure IoT Hub MQTT connection
     mqtt_app_start();
     vTaskDelay(pdMS_TO_TICKS(3000));
-    // Початкове налаштування LED
     uint8_t current_led = LED_MEDIUM;
     max30102_set_led_current(current_led, current_led);
-    ESP_LOGI(TAG, "🔆 Initial LED current: 0x%02X", current_led);
+    ESP_LOGI(TAG, "Initial LED current: 0x%02X", current_led);
     vTaskDelay(pdMS_TO_TICKS(200));
 
-    // Швидша калібрування
-    ESP_LOGI(TAG, "🔍 Calibrating ambient light...");
+    ESP_LOGI(TAG, "Calibrating ambient light...");
     uint32_t ir_sum = 0, red_sum = 0;
     int ambient_samples = 0;
 
@@ -544,11 +510,10 @@ void app_main(void)
     float red_baseline = (float)(red_sum / ambient_samples);
     float detect_threshold = fmaxf(DETECT_MIN_ABS, ir_baseline * DETECT_MULTIPLIER);
 
-    ESP_LOGI(TAG, "🌙 Ambient: IR=%.0f, RED=%.0f | Threshold: %.0f",
+    ESP_LOGI(TAG, "Ambient: IR=%.0f, RED=%.0f | Threshold: %.0f",
              ir_baseline, red_baseline, detect_threshold);
 
-    // Ініціалізація алгоритмів
-    ESP_LOGI(TAG, "🧠 Initializing algorithms...");
+    ESP_LOGI(TAG, "Initializing algorithms...");
     hr_init(&hr);
     spo2_init(&spo2);
 
@@ -558,7 +523,6 @@ void app_main(void)
     reset_filters(&ir_ma, &red_ma, &ir_dc_ma, &red_dc_ma, &hp_ir, &hp_red);
     reset_debug_stats();
 
-    // Оптимізовані змінні стану
     bool finger_detected = false;
     int stable_cnt = 0;
     int remove_cnt = 0;
@@ -575,9 +539,8 @@ void app_main(void)
     static float spo2_sum = 0.0f;
     static int spo2_count = 0;
 
-    ESP_LOGI(TAG, "👉 Ready! Place finger on sensor...");
+    ESP_LOGI(TAG, "Ready! Place finger on sensor...");
 
-    // Основний цикл
     while (1)
     {
         int64_t loop_start = esp_timer_get_time();
@@ -589,7 +552,7 @@ void app_main(void)
         {
             if (++consecutive_no_samples > 50)
             {
-                ESP_LOGW(TAG, "⚠️  Sensor communication issues");
+                ESP_LOGW(TAG, "Sensor communication issues");
                 consecutive_no_samples = 0;
             }
             vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
@@ -600,7 +563,6 @@ void app_main(void)
         float ir = (float)s.ir;
         float red = (float)s.red;
 
-        // Оптимізована детекція пальця
         if (!finger_detected)
         {
             bool finger_present = (ir > detect_threshold) && (red > detect_threshold * 0.8f);
@@ -613,8 +575,7 @@ void app_main(void)
                     stable_cnt = 0;
                     remove_cnt = 0;
 
-                    // Швидший прогрів
-                    ESP_LOGI(TAG, "🔥 Fast warmup...");
+                    ESP_LOGI(TAG, "Fast warmup...");
                     for (int i = 0; i < WARMUP_SAMPLES; ++i)
                     {
                         max30102_sample_t p;
@@ -650,79 +611,69 @@ void app_main(void)
             continue;
         }
 
-        // Чутливіше виявлення видалення пальця
         float remove_threshold = detect_threshold * REMOVE_FRACTION;
         if (ir < remove_threshold || red < remove_threshold)
         {
             if (++remove_cnt >= STABLE_COUNT)
             {
-                ESP_LOGW(TAG, "👉 Finger removed");
+                ESP_LOGW(TAG, "Finger removed");
                 finger_detected = false;
                 remove_cnt = 0;
                 print_debug_stats();
-                ESP_LOGI(TAG, "👉 Ready for next measurement...");
+                ESP_LOGI(TAG, "Ready for next measurement...");
             }
             vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
             continue;
         }
         remove_cnt = 0;
 
-        // Ефективна фільтрація
         float ir_dc = ma_dc_update(&ir_dc_ma, ir);
         float red_dc = ma_dc_update(&red_dc_ma, red);
         float ir_ac_raw = ir - ir_dc;
         float red_ac_raw = red - red_dc;
 
-        // High-pass фільтрація для видалення залишкового DC
         float ir_ac = highpass_update(&hp_ir, ir_ac_raw);
         float red_ac = highpass_update(&hp_red, red_ac_raw);
 
-        // Moving Average для згладжування AC
         ir_ac = ma_ac_update(&ir_ma, ir_ac);
         red_ac = ma_ac_update(&red_ma, red_ac);
 
-        // Стабілізація DC значення
         if (baseline_dc == 0.0f)
         {
             baseline_dc = ir_dc;
         }
         else
         {
-            // Повільна адаптація базової лінії
-            float alpha = 0.001f; // Дуже повільна адаптація
+            float alpha = 0.001f;
             baseline_dc = (1 - alpha) * baseline_dc + alpha * ir_dc;
         }
 
         samples++;
         debug_counter++;
 
-        // Покращена детекція руху
         float dc_deriv = (prev_dc > 1000.0f) ? fabsf(ir_dc - prev_dc) / prev_dc : 0.0f;
         deriv_smooth = DERIV_SMOOTH_ALPHA * dc_deriv + (1 - DERIV_SMOOTH_ALPHA) * deriv_smooth;
         prev_dc = ir_dc;
 
         bool motion_detected = (deriv_smooth > DERIV_LIMIT);
 
-        // Оцінка якості сигналу
         float ac_ratio = (ir_dc > 0.0f) ? fabsf(ir_ac) / ir_dc : 0.0f;
         float ac_abs = fabsf(ir_ac);
-        float signal_quality = fminf(ac_ratio / 0.01f, 1.0f); // Нормалізуємо якість 0-1
+        float signal_quality = fminf(ac_ratio / 0.01f, 1.0f);
 
         bool good_quality = evaluate_signal_quality(ac_ratio, ac_abs, ir_dc, motion_detected);
 
         update_debug_stats(ac_ratio, good_quality, motion_detected, signal_quality);
 
-        // Адаптивне керування LED
         if (debug_counter - last_led_update > 50)
-        { // Кожні 50 семплів
+        {
             uint8_t new_led = adaptive_led_control(ac_ratio, ac_abs, ir_dc);
             if (new_led != current_led)
             {
                 max30102_set_led_current(new_led, new_led);
-                // Логуємо тільки при значних змінах
                 if (abs((int)new_led - (int)current_led) > 0x10)
                 {
-                    ESP_LOGI(TAG, "💡 LED: 0x%02X (AC=%.1f, %.3f%%)",
+                    ESP_LOGI(TAG, "LED: 0x%02X (AC=%.1f, %.3f%%)",
                              new_led, ac_abs, ac_ratio * 100);
                 }
                 current_led = new_led;
@@ -730,7 +681,6 @@ void app_main(void)
             last_led_update = debug_counter;
         }
 
-        // Ефективне діагностичне логування
         if ((debug_counter % REPORT_EVERY) == 0)
         {
             const char *quality_indicator = good_quality ? "✅" : "❌";
@@ -751,7 +701,7 @@ void app_main(void)
             no_signal_counter++;
             if (no_signal_counter > 150)
             {
-                ESP_LOGW(TAG, "💡 Adjust finger position");
+                ESP_LOGW(TAG, "Adjust finger position");
                 no_signal_counter = 0;
             }
             vTaskDelay(pdMS_TO_TICKS(LOOP_DELAY_MS));
@@ -759,19 +709,16 @@ void app_main(void)
         }
         no_signal_counter = 0;
 
-        // Перевірка стабільності сигналу перед оновленням алгоритмів
         float ac_change = (last_good_ac > 0.0f) ? fabsf(ac_abs - last_good_ac) / fmaxf(ac_abs, 1.0f) : 0.0f;
 
         if (ac_change < 0.5f)
-        { // Максимальна зміна 50%
-            // Оновлення алгоритмів
+        {
             float bpm = 0.0f;
             bool hr_ok = hr_update(&hr, ir_ac, esp_timer_get_time(), &bpm);
             if (hr_ok)
             {
                 debug_stats.hr_updates++;
 
-                // ==== Count beats for 1-minute measurement ====
                 static int beat_count = 0;
                 static int64_t start_time_us = 0;
 
@@ -785,15 +732,12 @@ void app_main(void)
                 if (elapsed_sec >= 60.0f)
                 {
                     float bpm_minute = (float)beat_count * 60.0f / elapsed_sec;
-                    printf("❤️❤️❤️❤️❤️❤️❤️❤️❤️ BPM (1 min): %.0f\n", bpm_minute);
+                    printf("❤️ BPM (1 min): %.0f\n", bpm_minute);
                     send_telemetry_bpm(bpm_minute);
-                    // Reset for next 1-minute interval
                     if (spo2_count > 0)
                     {
                         float spo2_average = spo2_sum / spo2_count;
-                        printf("🫁🫁🫁🫁🫁🫁🫁🫁🫁 SpO2 (1 min avg): %.1f%%\n", spo2_average);
-                        // Якщо потрібно, тут ви можете викликати функцію send_telemetry для SpO2
-                        // send_telemetry_spo2(spo2_average);
+                        printf("🫁SpO2 (1 min avg): %.1f%%\n", spo2_average);
                         send_telemetry_spo2(spo2_average);
                     }
 
@@ -817,26 +761,25 @@ void app_main(void)
                 spo2_ok = false;
             }
 
-            // Вивід результатів
             if (hr_ok)
             {
                 ok_streak++;
                 if (ok_streak >= 2)
-                { // Швидше відображення результатів
+                {
                     printf("\n");
                     printf("╔══════════════════════════════╗\n");
                     printf("║        HEALTH MONITOR        ║\n");
                     printf("╠══════════════════════════════╣\n");
-                    printf("║ ❤️   Pulse: %3.0f BPM         ║\n", bpm);
+                    printf("║ Pulse: %3.0f BPM         ║\n", bpm);
                     if (spo2_ok)
                     {
-                        printf("║ 🫁   SpO2:   %2.0f %%           ║\n", spo2_val);
+                        printf("║ SpO2:   %2.0f %%           ║\n", spo2_val);
                     }
                     else
                     {
-                        printf("║ 🫁   SpO2:   -- %%            ║\n");
+                        printf("║ SpO2:   -- %%            ║\n");
                     }
-                    printf("║ 📶 Quality: %2.0f %%           ║\n", signal_quality * 100);
+                    printf("║ Quality: %2.0f %%           ║\n", signal_quality * 100);
                     printf("╚══════════════════════════════╝\n");
                 }
             }
@@ -848,17 +791,15 @@ void app_main(void)
             last_good_ac = ac_abs;
         }
 
-        // Точний контроль часу для стабільної частоти дискретизації
         int64_t loop_time = esp_timer_get_time() - loop_start;
         int32_t delay_needed = LOOP_DELAY_MS * 1000 - (int32_t)loop_time;
 
         if (delay_needed > 1000)
-        { // Мінімальна затримка 1ms
+        {
             vTaskDelay(pdMS_TO_TICKS(delay_needed / 1000));
         }
     }
 
-    // Очищення при виході
     max30102_cleanup();
     if (i2c_bus_handle != NULL)
     {

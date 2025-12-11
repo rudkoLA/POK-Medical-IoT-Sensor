@@ -8,10 +8,8 @@
 
 static const char *TAG = "MAX30102";
 
-// I2C дескриптор (глобальний для цього файлу)
 static i2c_master_dev_handle_t max30102_dev = NULL;
 
-// ==== ОНОВЛЕНІ I2C ФУНКЦІЇ ДЛЯ MAX30102 =================
 static esp_err_t max30102_read_reg(uint8_t reg, uint8_t *value)
 {
     if (max30102_dev == NULL || value == NULL) {
@@ -53,17 +51,15 @@ static esp_err_t max30102_read_fifo(uint8_t *buf)
     return ret;
 }
 
-// ================== ОНОВЛЕНІ ФУНКЦІЇ MAX30102 =================
 esp_err_t max30102_init(void)
 {
-    ESP_LOGI(TAG, "🔧 Initializing MAX30102 with new I2C driver...");
+    ESP_LOGI(TAG, "Initializing MAX30102 with new I2C driver...");
 
-    // Перевірка зв'язку - читаємо Part ID
     uint8_t part_id;
     esp_err_t ret = max30102_read_reg(REG_PART_ID, &part_id);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "❌ MAX30102 not responding - check wiring");
-        ESP_LOGE(TAG, "🔌 SDA=GPIO%d, SCL=GPIO%d, Addr=0x%02X",
+        ESP_LOGE(TAG, "SDA=GPIO%d, SCL=GPIO%d, Addr=0x%02X",
                 8, 9, MAX30102_I2C_ADDR);
         return ret;
     }
@@ -74,13 +70,11 @@ esp_err_t max30102_init(void)
         ESP_LOGI(TAG, "✅ MAX30102 Part ID: 0x%02X", part_id);
     }
 
-    // Soft reset
     ret = max30102_write_reg(REG_MODE_CONFIG, 0x40);
     if (ret != ESP_OK) return ret;
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    // Чекаємо завершення reset
     uint8_t mode_reg;
     int attempts = 0;
     do {
@@ -95,14 +89,12 @@ esp_err_t max30102_init(void)
         return ESP_ERR_TIMEOUT;
     }
 
-    // Конфігурація
     ret = max30102_write_reg(REG_INTR_ENABLE_1, 0xC0);
     if (ret != ESP_OK) return ret;
 
     ret = max30102_write_reg(REG_INTR_ENABLE_2, 0x00);
     if (ret != ESP_OK) return ret;
 
-    // Очищення FIFO
     ret = max30102_write_reg(REG_FIFO_WR_PTR, 0x00);
     if (ret != ESP_OK) return ret;
 
@@ -112,23 +104,19 @@ esp_err_t max30102_init(void)
     ret = max30102_write_reg(REG_FIFO_RD_PTR, 0x00);
     if (ret != ESP_OK) return ret;
 
-    // FIFO конфігурація
     ret = max30102_write_reg(REG_FIFO_CONFIG, 0x4F);
     if (ret != ESP_OK) return ret;
 
-    // Режим SpO2
     ret = max30102_write_reg(REG_MODE_CONFIG, MAX30102_MODE_SPO2);
     if (ret != ESP_OK) return ret;
 
-    // SpO2 конфігурація
     ret = max30102_write_reg(REG_SPO2_CONFIG, 0x47);
     if (ret != ESP_OK) return ret;
 
-    // LED потужність
-    ret = max30102_write_reg(REG_LED1_PA, 0x2F); // ~12.5mA
+    ret = max30102_write_reg(REG_LED1_PA, 0x2F);
     if (ret != ESP_OK) return ret;
 
-    ret = max30102_write_reg(REG_LED2_PA, 0x2F); // ~12.5mA
+    ret = max30102_write_reg(REG_LED2_PA, 0x2F);
     if (ret != ESP_OK) return ret;
 
     ESP_LOGI(TAG, "✅ MAX30102 initialized successfully");
@@ -159,13 +147,12 @@ esp_err_t max30102_set_led_current(uint8_t red_hex, uint8_t ir_hex)
     esp_err_t e2 = max30102_write_reg(REG_LED2_PA, ir_hex);
 
     if (e1 == ESP_OK && e2 == ESP_OK) {
-        ESP_LOGI(TAG, "💡 LED current: RED=0x%02X, IR=0x%02X", red_hex, ir_hex);
+        ESP_LOGI(TAG, "LED current: RED=0x%02X, IR=0x%02X", red_hex, ir_hex);
         return ESP_OK;
     }
     return ESP_FAIL;
 }
 
-// ================== ДОДАТКОВІ ФУНКЦІЇ =================
 esp_err_t max30102_setup_i2c(i2c_master_bus_handle_t bus_handle)
 {
     if (bus_handle == NULL) {

@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-// ===== Moving Average Filter для AC (швидкий) =====
 void ma_ac_init(ma_filter_ac_t *f)
 {
     if (f == NULL) return;
@@ -30,7 +29,6 @@ void ma_ac_reset(ma_filter_ac_t *f)
     ma_ac_init(f);
 }
 
-// ===== Moving Average Filter для DC (повільний) =====
 void ma_dc_init(ma_filter_dc_t *f)
 {
     if (f == NULL) return;
@@ -57,7 +55,6 @@ void ma_dc_reset(ma_filter_dc_t *f)
     ma_dc_init(f);
 }
 
-// ===== ВДОСКОНАЛЕНИЙ High-pass фільтр =====
 void highpass_init(highpass_t *hp, float cutoff_hz, float sample_rate)
 {
     if (hp == NULL) return;
@@ -66,9 +63,7 @@ void highpass_init(highpass_t *hp, float cutoff_hz, float sample_rate)
     hp->prev_output = 0.0f;
     hp->first_sample = true;
 
-    // Розрахунок коефіцієнтів
     if (cutoff_hz <= 0.0f || sample_rate <= 0.0f) {
-        // Значення за замовчуванням
         cutoff_hz = 0.5f;
         sample_rate = 100.0f;
     }
@@ -91,7 +86,6 @@ float highpass_update(highpass_t *hp, float input)
         return 0.0f;
     }
 
-    // Виправлена формула high-pass фільтра
     float output = hp->alpha * (hp->prev_output + input - hp->prev_input);
 
     hp->prev_input = input;
@@ -108,7 +102,6 @@ void highpass_reset(highpass_t *hp)
     hp->prev_output = 0.0f;
 }
 
-// ===== Band-pass фільтр для пульсу =====
 void bandpass_init(bandpass_t *bp, float hp_cutoff_hz, float sample_rate)
 {
     if (bp == NULL) return;
@@ -123,7 +116,6 @@ float bandpass_update(bandpass_t *bp, float input)
 {
     if (bp == NULL) return input;
 
-    // High-pass -> Moving Average (low-pass)
     float hp_out = highpass_update(&bp->hp, input);
     return ma_ac_update(&bp->ma, hp_out);
 }
@@ -135,7 +127,6 @@ void bandpass_reset(bandpass_t *bp)
     ma_ac_reset(&bp->ma);
 }
 
-// ===== Допоміжні функції (залишаються для зворотної сумісності) =====
 static highpass_t hp_ir = {0};
 static highpass_t hp_red = {0};
 
@@ -159,7 +150,6 @@ void highpass_reset_red(void)
     highpass_reset(&hp_red);
 }
 
-// Ініціалізація глобальних фільтрів (викликати один раз на початку)
 void filters_global_init(void)
 {
     highpass_init(&hp_ir, 0.5f, 100.0f);

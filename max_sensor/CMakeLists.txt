@@ -5,4 +5,5 @@
 cmake_minimum_required(VERSION 3.16)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(max_sensor)
+project(max_sensor VERSION 1.0 LANGUAGES C CXX)
+set(IDF_TARGET "esp32s3")

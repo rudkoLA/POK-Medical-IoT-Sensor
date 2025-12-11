@@ -32,7 +32,6 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_PASS ""
 #define IOTHUB_HOSTNAME "MedicalIotTest.azure-devices.net"
 #define DEVICE_ID "myiottest"
-#define SAS_TOKEN "SharedAccessSignature sr=MedicalIotTest.azure-devices.net%2Fdevices%2Fmyiottest&sig=IxqgSCyx8vkpj24vqXkjngbH83sJKIXeau07k5TD0G4%3D&se=1765398010"
 
 static const char *WIFI_TAG = "wifi_sta_app";
 static esp_mqtt_client_handle_t mqtt_client = NULL;
@@ -353,8 +352,12 @@ static void mqtt_app_start(void)
         .broker.address.uri = "mqtts://" IOTHUB_HOSTNAME ":8883",
         .credentials.client_id = DEVICE_ID,
         .credentials.username = username,
-        .credentials.authentication.password = SAS_TOKEN,
+
         .broker.verification.certificate = azure_root_cert,
+
+        .credentials.authentication.certificate = device_cert_pem,
+
+        .credentials.authentication.key = private_key_pem,
     };
 
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
